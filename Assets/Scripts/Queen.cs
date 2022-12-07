@@ -8,20 +8,21 @@ public class Queen : Piece{
     };
     
     public Queen(int team, int x, int y) : base(team, x, y){ }
+    public Queen(Queen toCopy) : base(toCopy){}
 
-    public override List<Vector2Int> PossibleMoves(Board board){
-        List<Vector2Int> moves = new List<Vector2Int>();
+    public override List<Vector2Int[]> PossibleMoves(Piece[,] board){
+        List<Vector2Int[]> moves = new List<Vector2Int[]>();
 
         foreach (var direction in Directions){
             var range = 1;
             var actualCoordinates = Coordinates + direction * range;
-            while (!board.IsOutOfBounds(actualCoordinates) && board.GetPieceAt(actualCoordinates) == null){
-                moves.Add(actualCoordinates);
+            while (!IsOutOfBounds(board, actualCoordinates) && GetPieceAt(board, actualCoordinates) == null){
+                moves.Add(new []{Coordinates, actualCoordinates});
 
                 range++;
                 actualCoordinates = Coordinates + direction * range;
             }
-            if (!board.IsOutOfBounds(actualCoordinates) && board.GetPieceAt(actualCoordinates).Team != Team) moves.Add(actualCoordinates);
+            if (!IsOutOfBounds(board, actualCoordinates) && GetPieceAt(board, actualCoordinates).Team != Team) moves.Add(new []{Coordinates, actualCoordinates});
         }
 
         return moves;
@@ -31,5 +32,13 @@ public class Queen : Piece{
         if (Team == 0)
             return board.Sprites.White.Queen;
         return board.Sprites.Black.Queen;
+    }
+
+    public override int GetValue(){
+        return 9;
+    }
+    
+    public override Piece Copy(){
+        return new Queen(Team, Coordinates.x, Coordinates.y);
     }
 }

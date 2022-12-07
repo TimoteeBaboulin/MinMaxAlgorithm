@@ -8,13 +8,16 @@ public class King : Piece{
     };
     
     public King(int team, int x, int y) : base(team, x, y){ }
+    
+    public King(King toCopy) : base(toCopy){}
 
-    public override List<Vector2Int> PossibleMoves(Board board){
-        List<Vector2Int> moves = new List<Vector2Int>();
+    public override List<Vector2Int[]> PossibleMoves(Piece[,] board){
+        List<Vector2Int[]> moves = new List<Vector2Int[]>();
 
         foreach (var direction in Directions){
             var actualCoordinates = Coordinates + direction;
-            if (!board.IsOutOfBounds(actualCoordinates) && board.GetPieceAt(actualCoordinates).Team != Team) moves.Add(actualCoordinates);
+            if (!IsOutOfBounds(board, actualCoordinates) && GetPieceAt(board, actualCoordinates) != null && GetPieceAt(board, actualCoordinates).Team != Team)
+                moves.Add(new[] {Coordinates, actualCoordinates });
         }
 
         return moves;
@@ -24,5 +27,13 @@ public class King : Piece{
         if (Team == 0)
             return board.Sprites.White.King;
         return board.Sprites.Black.King;
+    }
+
+    public override int GetValue(){
+        return 100;
+    }
+
+    public override Piece Copy(){
+        return new King(Team, Coordinates.x, Coordinates.y);
     }
 }

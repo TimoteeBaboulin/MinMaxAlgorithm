@@ -6,43 +6,22 @@ public class Board : MonoBehaviour{
     public Piece[,] CurrentBoard;
     [NonSerialized] public List<Piece> PiecesEaten;
     public PieceSprites Sprites;
+    [Range(0,1)]public int CurrentPlayer;
 
+    [SerializeField] private GameObject _pieceParent;
+    [SerializeField] private GameObject _tileParent;
     [SerializeField] private GameObject _tileBase;
-
-    private int[,] _baseBoard ={
-        {-4, -2, -3, -5, -6, -3, -2, -4 },
-        {-1, -1, -1, -1, -1, -1, -1, -1 },
-        { 0,  0,  0,  0,  0,  0,  0,  0 },
-        { 0,  0,  0,  0,  0,  0,  0,  0 },
-        { 0,  0,  0,  0,  0,  0,  0,  0 },
-        { 0,  0,  0,  0,  0,  0,  0,  0 },
-        { 1,  1,  1,  1,  1,  1,  1,  1 },
-        { 4,  2,  3,  5,  6,  3,  2,  4 },
-    };
+    
+    private int[,] _baseBoard = BaseBoards.Standard;
+    
+    private GameObject[,] _tiles;
     private List<GameObject> _objects;
-
-    public Vector2Int GetIndex(Piece piece){
-        for (int x = 0; x < CurrentBoard.GetLength(0); x++){
-            for (int y = 0; y < CurrentBoard.GetLength(1); y++){
-                if (CurrentBoard[x, y] == piece) return new Vector2Int(x, y);
-            }
-        }
-
-        throw new NullReferenceException("Can't find piece");
-    }
-
-    public Piece GetPieceAt(Vector2Int coordinates){
-        return CurrentBoard[coordinates.x, coordinates.y];
-    }
-
-    public bool IsOutOfBounds(Vector2Int coordinates){
-        if (coordinates.x > 7 || coordinates.y > 7 || coordinates.x < 0 || coordinates.y < 0) return false;
-        return true;
-    }
+    private List<GameObject> _possibleMoves;
 
     public void Start(){
         CurrentBoard = new Piece[8, 8];
         _objects = new List<GameObject>();
+        _possibleMoves = new List<GameObject>();
 
         for (int x = 0; x < CurrentBoard.GetLength(0); x++){
             for (int y = 0; y < CurrentBoard.GetLength(1); y++){
@@ -79,13 +58,24 @@ public class Board : MonoBehaviour{
             }
         }
         
+        NegaMax();
         DrawBoard();
         UpdateBoard();
+    }
+
+    private void Update(){
+        // NegaMax();
+        // UpdateBoard();
+        // DrawPossibleMoves();
     }
 
     private void UpdateBoard(){
         foreach (var gameObject in _objects){
             Destroy(gameObject);
+        }
+
+        foreach (var move in _possibleMoves){
+            Destroy(move);
         }
 
         float height = CurrentBoard.GetLength(0);
@@ -95,7 +85,9 @@ public class Board : MonoBehaviour{
             for (int y = 0; y < length; y++){
                 if (CurrentBoard[x, y] != null){
                     GameObject newPiece = new GameObject(CurrentBoard[x,y].GetSprite(this).name);
-                    newPiece.transform.position = new Vector3(y - length / 2, x - (height / 2) + 0.5f, 0);
+                    newPiece.transform.position = new Vector3(length/2 - y -0.5f , height/2 - x -0.5f, 0);
+                    if (_pieceParent != null) newPiece.transform.parent = _pieceParent.transform;
+                    
                     var renderer = newPiece.AddComponent<SpriteRenderer>() as SpriteRenderer;
                     renderer.sprite = CurrentBoard[x, y].GetSprite(this);
                     _objects.Add(newPiece);
@@ -103,18 +95,49 @@ public class Board : MonoBehaviour{
             }
         }
     }
-
     private void DrawBoard(){
         int height = CurrentBoard.GetLength(0);
         int length = CurrentBoard.GetLength(1);
 
+        _tiles = new GameObject[height, length];
+        
         for (int x = 0; x < height; x++){
             for (int y = 0; y < length; y++){
-                var newTile = Instantiate(_tileBase, new Vector3(y - (length / 2), x - (height / 2) + 0.5f, 1),
+                var newTile = Instantiate(_tileBase, new Vector3(length/2 - y -0.5f , height/2 - x -0.5f, 1),
                     Quaternion.identity);
-                Color color = (x + y) % 2 == 0 ? Color.white : Color.black;
+                if (_tileParent != null) newTile.transform.parent = _tileParent.transform;
+                
+                Color color = (x + y) % 2 == 1 ? Color.white : Color.black;
                 newTile.GetComponent<MeshRenderer>().material.color = color;
+                _tiles[x, y] = newTile;
             }
         }
+    }
+
+    private void DrawPossibleMoves(){
+        foreach (var move in _possibleMoves){
+            Destroy(move);
+        }
+        
+        List<Vector2Int[]> possibleMoves = new List<Vector2Int[]>();
+        foreach (var piece in CurrentBoard){
+            if (piece == null || piece.Team != CurrentPlayer) continue;
+            var moves = piece.PossibleMoves(CurrentBoard);
+            if (moves != null) possibleMoves.AddRange(moves);
+        }
+        
+        int height = CurrentBoard.GetLength(0);
+        int length = CurrentBoard.GetLength(1);
+        foreach (var possibleMove in possibleMoves){
+            var newTile = Instantiate(_tileBase, new Vector3(length/2 - possibleMove[1].y -0.5f , height/2 - possibleMove[1].x -0.5f, -1),
+                Quaternion.identity);
+            newTile.GetComponent<MeshRenderer>().material.color = Color.blue;
+            _possibleMoves.Add(newTile);
+        }
+    }
+
+    private void NegaMax(){
+        Node currentPosition = new Node(CurrentBoard, CurrentPlayer);
+        CurrentBoard = currentPosition.GetMove(3, CurrentPlayer == 0 ? 1 : -1);
     }
 }

@@ -1,21 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Pawn : Piece{
     public Pawn(int team, int x, int y) : base(team, x, y){ }    
+    public Pawn(Pawn toCopy) : base(toCopy){}
     
-    public override List<Vector2Int> PossibleMoves(Board board){
-        List<Vector2Int> moves = new List<Vector2Int>();
+    public override List<Vector2Int[]> PossibleMoves(Piece[,] board){
+        List<Vector2Int[]> moves = new List<Vector2Int[]>();
 
-        Vector2Int forward = Team == 0 ? Vector2Int.down : Vector2Int.up;
-        if (board.GetPieceAt(Coordinates + forward) == null){
-            if (!HasMoved && board.GetPieceAt(Coordinates + 2 * forward) == null) moves.Add(Coordinates + 2 * forward);
-            moves.Add(Coordinates + forward);
+        Vector2Int forward = Team == 0 ? Vector2Int.left : Vector2Int.right;
+        Vector2Int actualCoordinates;
+        if (!IsOutOfBounds(board, actualCoordinates = Coordinates + forward) && GetPieceAt(board, actualCoordinates) == null){
+            moves.Add(new []{Coordinates, actualCoordinates});
+            
+            if (!HasMoved && !IsOutOfBounds(board, actualCoordinates = Coordinates + 2 * forward) && GetPieceAt(board, actualCoordinates) == null) moves.Add(new []{Coordinates, actualCoordinates});
         }
 
         for (int x = -1; x <= 1; x += 2){
-            if (board.GetPieceAt(Coordinates + Vector2Int.right * x).Team != Team) moves.Add(Coordinates + Vector2Int.right * x);
+            if (!IsOutOfBounds(board, actualCoordinates = Coordinates + Vector2Int.right * x) && GetPieceAt(board, actualCoordinates) != null && GetPieceAt(board, actualCoordinates).Team != Team) moves.Add(new []{Coordinates, actualCoordinates});
         }
 
         return moves;
@@ -25,5 +27,13 @@ public class Pawn : Piece{
         if (Team == 0)
             return board.Sprites.White.Pawn;
         return board.Sprites.Black.Pawn;
+    }
+
+    public override int GetValue(){
+        return 1;
+    }
+    
+    public override Piece Copy(){
+        return new Pawn(Team, Coordinates.x, Coordinates.y);
     }
 }
