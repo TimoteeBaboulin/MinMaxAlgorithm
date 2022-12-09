@@ -74,17 +74,14 @@ public class Rook : Piece{
 
         return moves;
     }
-
     public override Sprite GetSprite(Board board){
         if (Team == 0)
             return board.Sprites.White.Rook;
         return board.Sprites.Black.Rook;
     }
-
     public override int GetValue(){
         return 5;
     }
-    
     public override Piece Copy(){
         return new Rook(Team);
     }

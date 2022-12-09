@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Piece{
-    public int Team;
+    public readonly int Team;
     public bool HasMoved;
 
     public Piece(int team){
@@ -22,36 +22,35 @@ public abstract class Piece{
         return board[coord.x, coord.y];
     }
 
-    // protected bool GetCoordinates(Piece[,] board, out Vector2Int coordinates){
-    //     for (int x = 0; x < board.GetLength(0); x++){
-    //         for (int y = 0; y < board.GetLength(1); y++){
-    //             if (board[x,y] != this) continue;
-    //             coordinates = new Vector2Int(x, y);
-    //             return true;
-    //         }
-    //     }
-    //     coordinates = Vector2Int.zero;
-    //     return false;
+    // public void Move(Piece[,] board, Move move){
+    //     if (board[move.StartingPosition.x, move.StartingPosition.y] != this) return;
+    //     if (!HasMoved) HasMoved = true;
+    //     
+    //     board[move.StartingPosition.x, move.StartingPosition.y] = null;
+    //     board[move.EndingPosition.x, move.EndingPosition.y] = this;
     // }
-    public void Move(Piece[,] board, Move move){
-        if (board[move.StartingPosition.x, move.StartingPosition.y] != this) return;
-        if (!HasMoved) HasMoved = true;
-        
-        board[move.StartingPosition.x, move.StartingPosition.y] = null;
-        board[move.EndingPosition.x, move.EndingPosition.y] = this;
-    }
 }
 
-public struct Move{
+public class Move{
     public Vector2Int StartingPosition;
     public Vector2Int EndingPosition;
-    public Piece Attacker;
-    public Piece Defender;
+    public readonly Piece Attacker;
+    public readonly Piece Defender;
 
     public Move(Vector2Int startingPosition, Vector2Int endingPosition, Piece attacker, Piece defender){
         StartingPosition = startingPosition;
         EndingPosition = endingPosition;
         Attacker = attacker;
         Defender = defender;
+    }
+
+    public void Do(Piece[,] board){
+        board[StartingPosition.x, StartingPosition.y] = null;
+        board[EndingPosition.x, EndingPosition.y] = Attacker;
+    }
+
+    public void Undo(Piece[,] board){
+        board[StartingPosition.x, StartingPosition.y] = Attacker;
+        board[EndingPosition.x, EndingPosition.y] = Defender;
     }
 }

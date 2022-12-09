@@ -48,10 +48,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="25392">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="18484">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" value="25392" />
+      <option name="pid" value="18484" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -70,6 +70,7 @@
       <workItem from="1670322317240" duration="11446000" />
       <workItem from="1670398355902" duration="870000" />
       <workItem from="1670482842463" duration="19804000" />
+      <workItem from="1670569577317" duration="9582000" />
     </task>
     <servers />
   </component>
@@ -86,16 +87,16 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Assets/Scripts/Board.cs</url>
-          <line>118</line>
-          <properties documentPath="C:\Users\t.baboulin\Documents\LocalRepositories\MinMaxAlgorithm\Assets\Scripts\Board.cs" initialLine="101" containingFunctionPresentation="method 'DrawBoard'">
+          <line>188</line>
+          <properties documentPath="C:\Users\t.baboulin\Documents\LocalRepositories\MinMaxAlgorithm\Assets\Scripts\Board.cs" initialLine="188" containingFunctionPresentation="method 'NegaMax'">
             <startOffsets>
-              <option value="3740" />
+              <option value="6335" />
             </startOffsets>
             <endOffsets>
-              <option value="3741" />
+              <option value="6336" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="24" />
+          <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

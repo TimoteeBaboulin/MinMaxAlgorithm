@@ -33,6 +33,7 @@ public class Board : MonoBehaviour{
     private GameObject[,] _tiles;
     private List<GameObject> _objects;
     private List<GameObject> _possibleMoves;
+    private Move _bestMove;
 
     private float _time;
 
@@ -80,11 +81,11 @@ public class Board : MonoBehaviour{
         // NegaMax();
         // CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
         // UpdatePieces();
-        // DrawBoard();
+        DrawBoard();
     }
     private void Update(){
-         // NegaMax();
-         // CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
+        NegaMaxSetUp();
+        CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
         
         UpdatePieces();
         DrawPossibleMoves();
@@ -164,13 +165,65 @@ public class Board : MonoBehaviour{
         }
     }
     
-    private void NegaMax(){
+    private void NegaMaxSetUp(){
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        Node currentPosition = new Node(CurrentBoard, CurrentPlayer);
-        CurrentBoard = currentPosition.GetMove(_depth, 1);
+
+        _bestMove = null;
+        
+        Node currentPosition = new Node(CurrentBoard, null);
+        float value = NegaMax(currentPosition, _depth, -1000, 1000, 1);
+        Debug.Log("Chose move with value: " + value);
+
+        if (_bestMove == null){
+            Debug.Log("Couldn't find move");
+            return;
+        }
+        
+        _bestMove.Do(CurrentBoard);
+        
         Debug.Log("Ce coups a pris: " + stopwatch.Elapsed.ToString() + " secondes.");
         stopwatch.Stop();
+    }
+
+    private float NegaMax(Node node, int depth, int color){
+        node.GenerateMoves(CurrentPlayer);
+        if (depth == 0 || node.IsTerminal)
+            return node.CalculateValue(CurrentPlayer) * color;
+        
+        node.GenerateChildren();
+        float value = -1000;
+        foreach (var child in node.Children){
+            float childValue = -NegaMax(child, depth - 1, -color);
+            if (value < childValue){
+                value = childValue;
+                _bestMove = child.Move;
+            }
+        }
+
+        return value;
+    }
+    private float NegaMax(Node node, int depth, float alpha, float beta, int color){
+        node.GenerateMoves(CurrentPlayer);
+        if (depth == 0 || node.IsTerminal)
+            return node.CalculateValue(CurrentPlayer) * color;
+        
+        node.GenerateChildren();
+        float value = -1000;
+        foreach (var child in node.Children){
+            float childValue = -NegaMax(child, depth - 1, -beta, -alpha, -color);
+            if (value < childValue){
+                value = childValue;
+                _bestMove = child.Move;
+            }
+
+            alpha = Math.Max(alpha, value);
+            if (alpha >= beta)
+                break;
+
+        }
+
+        return value;
     }
 
     private void GetStartingPosition(){
@@ -199,5 +252,7 @@ public class Board : MonoBehaviour{
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        _baseBoard = BaseBoards.Test;
     }
 }
