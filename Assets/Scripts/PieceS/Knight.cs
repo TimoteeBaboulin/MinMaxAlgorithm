@@ -26,18 +26,12 @@ public class Knight : Piece{
 
         return moves;
     }
-
     public override Sprite GetSprite(Board board){
         if (Team == 0)
             return board.Sprites.White.Knight;
         return board.Sprites.Black.Knight;
     }
-
     public override int GetValue(){
         return 3;
-    }
-    
-    public override Piece Copy(){
-        return new Knight(Team);
     }
 }

@@ -22,18 +22,12 @@ public class King : Piece{
 
         return moves;
     }
-
     public override Sprite GetSprite(Board board){
         if (Team == 0)
             return board.Sprites.White.King;
         return board.Sprites.Black.King;
     }
-
     public override int GetValue(){
-        return 100;
-    }
-
-    public override Piece Copy(){
-        return new King(Team);
+        return 0;
     }
 }

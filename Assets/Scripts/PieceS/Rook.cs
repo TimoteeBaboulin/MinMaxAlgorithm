@@ -82,7 +82,4 @@ public class Rook : Piece{
     public override int GetValue(){
         return 5;
     }
-    public override Piece Copy(){
-        return new Rook(Team);
-    }
 }

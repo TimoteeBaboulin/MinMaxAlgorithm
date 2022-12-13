@@ -6,7 +6,7 @@ public class Bishop : Piece{
         { new(1, 1), new(1, -1), new(-1, -1), new(-1, 1) };
     
     public Bishop(int team) : base(team){ }
-
+    
     public override List<Move> PossibleMoves(Piece[,] board, Vector2Int coordinates){
         if (board[coordinates.x, coordinates.y] != this) return new List<Move>();
         
@@ -38,18 +38,12 @@ public class Bishop : Piece{
 
         return moves;
     }
-
     public override Sprite GetSprite(Board board){
         if (Team == 0)
             return board.Sprites.White.Bishop;
         return board.Sprites.Black.Bishop;
     }
-
     public override int GetValue(){
         return 3;
-    }
-    
-    public override Piece Copy(){
-        return new Bishop(Team);
     }
 }

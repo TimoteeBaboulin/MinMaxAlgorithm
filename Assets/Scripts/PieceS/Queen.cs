@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Timers;
 using UnityEngine;
 
 public class Queen : Piece{
@@ -34,18 +33,12 @@ public class Queen : Piece{
 
         return moves;
     }
-
     public override Sprite GetSprite(Board board){
         if (Team == 0)
             return board.Sprites.White.Queen;
         return board.Sprites.Black.Queen;
     }
-
     public override int GetValue(){
         return 9;
-    }
-    
-    public override Piece Copy(){
-        return new Queen(Team);
     }
 }

@@ -33,18 +33,12 @@ public class Pawn : Piece{
 
         return moves;
     }
-
     public override Sprite GetSprite(Board board){
         if (Team == 0)
             return board.Sprites.White.Pawn;
         return board.Sprites.Black.Pawn;
     }
-
     public override int GetValue(){
         return 1;
-    }
-    
-    public override Piece Copy(){
-        return new Pawn(Team);
     }
 }

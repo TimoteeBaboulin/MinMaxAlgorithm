@@ -5,7 +5,7 @@ public abstract class Piece{
     public readonly int Team;
     public bool HasMoved;
 
-    public Piece(int team){
+    protected Piece(int team){
         Team = team;
     }
 
@@ -13,29 +13,21 @@ public abstract class Piece{
     public abstract Sprite GetSprite(Board board);
     public abstract int GetValue();
 
-    public abstract Piece Copy();
-    
     protected bool IsOutOfBounds(Piece[,] board, Vector2Int coord){
         return coord.x >= board.GetLength(0) || coord.y >= board.GetLength(1) || coord.x < 0 || coord.y < 0;
     }
     protected Piece GetPieceAt(Piece[,] board, Vector2Int coord){
         return board[coord.x, coord.y];
     }
-
-    // public void Move(Piece[,] board, Move move){
-    //     if (board[move.StartingPosition.x, move.StartingPosition.y] != this) return;
-    //     if (!HasMoved) HasMoved = true;
-    //     
-    //     board[move.StartingPosition.x, move.StartingPosition.y] = null;
-    //     board[move.EndingPosition.x, move.EndingPosition.y] = this;
-    // }
 }
 
 public class Move{
     public Vector2Int StartingPosition;
     public Vector2Int EndingPosition;
-    public readonly Piece Attacker;
-    public readonly Piece Defender;
+    public Piece Attacker;
+    public Piece Defender;
+
+    private bool _didAttackerMoveBefore;
 
     public Move(Vector2Int startingPosition, Vector2Int endingPosition, Piece attacker, Piece defender){
         StartingPosition = startingPosition;
@@ -45,12 +37,22 @@ public class Move{
     }
 
     public void Do(Piece[,] board){
+        _didAttackerMoveBefore = board[StartingPosition.x, StartingPosition.y].HasMoved;
+
+        Attacker = board[StartingPosition.x, StartingPosition.y];
+        Defender = board[EndingPosition.x, EndingPosition.y];
+        
+        
         board[StartingPosition.x, StartingPosition.y] = null;
         board[EndingPosition.x, EndingPosition.y] = Attacker;
+        
+        Attacker.HasMoved = true;
     }
 
     public void Undo(Piece[,] board){
         board[StartingPosition.x, StartingPosition.y] = Attacker;
         board[EndingPosition.x, EndingPosition.y] = Defender;
+
+        board[StartingPosition.x, StartingPosition.y].HasMoved = _didAttackerMoveBefore;
     }
 }
