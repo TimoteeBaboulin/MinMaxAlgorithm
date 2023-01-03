@@ -395,12 +395,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Sprites: {fileID: 11400000, guid: f0f870e2c5d9b55479f2f39896a68f1a, type: 2}
-  CurrentPlayer: 1
-  _depth: 4
   _pieceParent: {fileID: 1359229272}
   _tileParent: {fileID: 862713211}
   _tileBase: {fileID: 2389774468048913912, guid: f07605ca9cb8fc74ba4d822c0044c73e, type: 3}
-  _startingPosition: 0
+  CurrentPlayer: 0
+  _depth: 3
+  _timeBetweenMoves: 2
+  _startingPosition: 8
+  _gameMode: 0
+  _humanPlayer: 0
 --- !u!4 &1764422389
 Transform:
   m_ObjectHideFlags: 0

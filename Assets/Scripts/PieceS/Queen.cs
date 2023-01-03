@@ -9,8 +9,9 @@ public class Queen : Piece{
     
     public Queen(int team) : base(team){ }
 
-    public override List<Move> PossibleMoves(Piece[,] board, Vector2Int coordinates){
-        if (board[coordinates.x, coordinates.y] != this) return new List<Move>();
+    public override List<Move> PossibleMoves(Board board, Vector2Int coordinates){
+        var currentBoard= board.CurrentBoard;
+        if (currentBoard[coordinates.x, coordinates.y] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
@@ -18,7 +19,7 @@ public class Queen : Piece{
             var range = 1;
             var actualCoordinates = coordinates + direction * range;
             Piece pieceBlocking = null;
-            while (!IsOutOfBounds(board, actualCoordinates) && (pieceBlocking = GetPieceAt(board, actualCoordinates)) == null){
+            while (!IsOutOfBounds(currentBoard, actualCoordinates) && (pieceBlocking = GetPieceAt(currentBoard, actualCoordinates)) == null){
                 moves.Add(new Move(coordinates, actualCoordinates, this, null));
         
                 range++;
@@ -26,17 +27,17 @@ public class Queen : Piece{
             }
 
             
-            if (!IsOutOfBounds(board, actualCoordinates) && pieceBlocking != null && pieceBlocking.Team != Team){
+            if (!IsOutOfBounds(currentBoard, actualCoordinates) && pieceBlocking != null && pieceBlocking.Team != Team){
                 moves.Add(new Move(coordinates, actualCoordinates, this, pieceBlocking));
             }
         }
 
         return moves;
     }
-    public override Sprite GetSprite(Board board){
+    public override Sprite GetSprite(BoardComponent boardComponent){
         if (Team == 0)
-            return board.Sprites.White.Queen;
-        return board.Sprites.Black.Queen;
+            return boardComponent.Sprites.White.Queen;
+        return boardComponent.Sprites.Black.Queen;
     }
     public override int GetValue(){
         return 9;

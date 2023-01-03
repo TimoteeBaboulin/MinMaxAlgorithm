@@ -8,8 +8,9 @@ public class Rook : Piece{
 
     public Rook(int team) : base(team){ }
 
-    public override List<Move> PossibleMoves(Piece[,] board, Vector2Int coordinates){
-        if (board[coordinates.x, coordinates.y] != this) return new List<Move>();
+    public override List<Move> PossibleMoves(Board board, Vector2Int coordinates){
+        var currentBoard = board.CurrentBoard;
+        if (currentBoard[coordinates.x, coordinates.y] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
@@ -18,8 +19,8 @@ public class Rook : Piece{
         for (int horizontal = -1; horizontal <= 1; horizontal+=2){
             actualCoordinates.y += horizontal;
             
-            while (!IsOutOfBounds(board, actualCoordinates) ){
-                Piece pieceBlocking = GetPieceAt(board, actualCoordinates);
+            while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
+                Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                 if (pieceBlocking == null){
                     moves.Add(new Move(coordinates, actualCoordinates, this, null));
                     actualCoordinates.y += horizontal;
@@ -38,8 +39,8 @@ public class Rook : Piece{
         for (int vertical = -1; vertical <= 1; vertical++){
             actualCoordinates.x += vertical;
 
-            while (!IsOutOfBounds(board, actualCoordinates) ){
-                Piece pieceBlocking = GetPieceAt(board, actualCoordinates);
+            while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
+                Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                 if (pieceBlocking == null){
                     moves.Add(new Move(coordinates, actualCoordinates, this, null));
                     actualCoordinates.x += vertical;
@@ -74,10 +75,10 @@ public class Rook : Piece{
 
         return moves;
     }
-    public override Sprite GetSprite(Board board){
+    public override Sprite GetSprite(BoardComponent boardComponent){
         if (Team == 0)
-            return board.Sprites.White.Rook;
-        return board.Sprites.Black.Rook;
+            return boardComponent.Sprites.White.Rook;
+        return boardComponent.Sprites.Black.Rook;
     }
     public override int GetValue(){
         return 5;

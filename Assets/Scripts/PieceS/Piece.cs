@@ -2,15 +2,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Piece{
-    public readonly int Team;
+    public readonly Team Team;
     public bool HasMoved;
 
     protected Piece(int team){
-        Team = team;
+        Team = (Team)team;
     }
 
-    public abstract List<Move> PossibleMoves(Piece[,] board, Vector2Int coordinates);
-    public abstract Sprite GetSprite(Board board);
+    public abstract List<Move> PossibleMoves(Board currentBoard, Vector2Int coordinates);
+    public abstract Sprite GetSprite(BoardComponent boardComponent);
     public abstract int GetValue();
 
     protected bool IsOutOfBounds(Piece[,] board, Vector2Int coord){
@@ -39,8 +39,8 @@ public class Move{
     public void Do(Piece[,] board){
         _didAttackerMoveBefore = board[StartingPosition.x, StartingPosition.y].HasMoved;
 
-        Attacker = board[StartingPosition.x, StartingPosition.y];
-        Defender = board[EndingPosition.x, EndingPosition.y];
+        // Attacker = board[StartingPosition.x, StartingPosition.y];
+        // Defender = board[EndingPosition.x, EndingPosition.y];
         
         
         board[StartingPosition.x, StartingPosition.y] = null;
