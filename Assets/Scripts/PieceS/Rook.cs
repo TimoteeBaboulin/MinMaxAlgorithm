@@ -81,6 +81,6 @@ public class Rook : Piece{
         return boardComponent.Sprites.Black.Rook;
     }
     public override int GetValue(){
-        return 5;
+        return 525;
     }
 }

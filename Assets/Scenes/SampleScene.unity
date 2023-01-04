@@ -401,7 +401,7 @@ MonoBehaviour:
   CurrentPlayer: 0
   _depth: 3
   _timeBetweenMoves: 2
-  _startingPosition: 8
+  _startingPosition: 0
   _gameMode: 0
   _humanPlayer: 0
 --- !u!4 &1764422389

@@ -19,11 +19,12 @@ public class BoardComponent : MonoBehaviour{
         QueenTest,
         KingTest,
         CheckTest,
-        CheckMateTest
+        CheckMateTest,
+        BishopPairTest
     }
     private enum GameMode{
         AIvsAI,
-        PlayerVSAI
+        PlayerVsAI
     }
 
     
@@ -37,7 +38,7 @@ public class BoardComponent : MonoBehaviour{
     [SerializeField] private GameObject _tileBase;
 
     [Header("Current player, do not touch")]
-    [Range(0,1)]public int CurrentPlayer;
+    [Range(0,1)]public Team CurrentPlayer;
 
     [Header("AI settings")]
     [SerializeField] private int _depth;
@@ -110,7 +111,7 @@ public class BoardComponent : MonoBehaviour{
             }
         }
 
-        _board = new Board(CurrentBoard, CurrentPlayer);
+        _board = new Board(CurrentBoard, (int)CurrentPlayer);
         //Draw the background tiles
         DrawBoard();
         InstantiatePieces();
@@ -120,7 +121,7 @@ public class BoardComponent : MonoBehaviour{
         if (_time < _timeBetweenMoves) return;
         _time = 0;
         MinMaxAlphaBetaSetUp();
-        CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
+        CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
         
         UpdatePieces();
         // DrawPossibleMoves();
@@ -137,8 +138,8 @@ public class BoardComponent : MonoBehaviour{
                     newPiece.transform.position = new Vector3(length/2 - y -0.5f , height/2 - x -0.5f, 0);
                     if (_pieceParent != null) newPiece.transform.parent = _pieceParent.transform;
                     
-                    var renderer = newPiece.AddComponent<SpriteRenderer>() as SpriteRenderer;
-                    renderer.sprite = CurrentBoard[x, y].GetSprite(this);
+                    var newRenderer = newPiece.AddComponent<SpriteRenderer>() as SpriteRenderer;
+                    newRenderer.sprite = CurrentBoard[x, y].GetSprite(this);
                     _pieces[x, y] = newPiece;
                 }
             }
@@ -266,17 +267,18 @@ public class BoardComponent : MonoBehaviour{
         
         Node currentPosition = new Node(_board, null);
         float value = MinMax(currentPosition, _depth, -1500, 1500, true, out Move bestMove);
-        Debug.Log("Chose move with value: " + value);
-        
+
         if (bestMove == null){
             Debug.Log("Couldn't find move");
             return;
         }
+
+        string log = "Valeur du coups: " + value + "\nCe coups a pris: " + stopwatch.Elapsed;
+        Debug.Log(log);
         
         _board.Do(bestMove);
         _lastMove = bestMove;
 
-        Debug.Log("Ce coups a pris: " + stopwatch.Elapsed.ToString() + " secondes.");
         stopwatch.Stop();
     }
 
@@ -383,7 +385,7 @@ public class BoardComponent : MonoBehaviour{
         if (maximizing){
             value = -1000;
             foreach (var child in node.Children){
-                float childValue = MinMax(child, depth - 1, alpha, beta, false, out Move move);
+                var childValue = MinMax(child, depth - 1, alpha, beta, false, out Move move);
                 if (childValue > value){
                     bestMove = child.Move;
                     value = childValue;
@@ -391,7 +393,6 @@ public class BoardComponent : MonoBehaviour{
 
                 alpha = Math.Max(alpha, value);
                 if (value >= beta) break;
-                
             }
         }
         else{
@@ -441,6 +442,9 @@ public class BoardComponent : MonoBehaviour{
             case StartingPosition.CheckMateTest:
                 _baseBoard = BaseBoards.CheckMateTest;
                 break;
+            case StartingPosition.BishopPairTest:
+                _baseBoard = BaseBoards.BishopPairTest;
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -448,20 +452,30 @@ public class BoardComponent : MonoBehaviour{
 }
 
 public class Board{
-    private Piece[,] _board;
+    private readonly Piece[,] _board;
     public Piece[,] CurrentBoard => _board;
-
     private Team _player;
     public Team CurrentPlayer => _player;
 
-    private Stack<Move> _moves;
-
+    private List<Piece>[] _teamPieces;
+    private readonly Stack<Move> _moves;
+    private readonly Bishop[,] _bishops;
+    
     public Board(Piece[,] baseBoard, int currentPlayer){
         _board = baseBoard;
         _player = (Team)currentPlayer;
         _moves = new Stack<Move>();
+        
+        _teamPieces = new List<Piece>[2];
+        _teamPieces[0] = new List<Piece>();
+        _teamPieces[1] = new List<Piece>();
+        foreach (var piece in _board){
+            if (piece != null)
+                _teamPieces[(int)piece.Team].Add(piece);
+        }
     }
 
+    //Methodes liees au calcul des moves
     public List<Move> GetLegalMoves(){
         List<Move> moves = new List<Move>();
         for (int x = 0; x < _board.GetLength(0); x++){
@@ -483,6 +497,26 @@ public class Board{
         return moves;
     }
 
+    public List<Move> GetLegalMoves(Team team){
+        List<Move> moves = new List<Move>();
+        for (int x = 0; x < _board.GetLength(0); x++){
+            for (int y = 0; y < _board.GetLength(1); y++){
+                Piece piece = _board[x, y];
+                if (piece == null || piece.Team != team) continue;
+                moves.AddRange(piece.PossibleMoves(this, new Vector2Int(x,y)));
+            }
+        }
+
+        for (int x = moves.Count - 1; x >= 0; x--){
+            var currentMove = moves[x];
+            currentMove.Do(_board);
+
+            if (IsInCheck()) moves.Remove(moves[x]);
+            currentMove.Undo(_board);
+        }
+
+        return moves;
+    }
     public bool IsInCheck(){
         List<Move> moves = new List<Move>();
         for (int x = 0; x < _board.GetLength(0); x++){
@@ -501,13 +535,13 @@ public class Board{
         return false;
     }
 
+    //Joues un coups, ou revient un coups en arriere
     public void Do(Move move){
         
         move.Do(_board);
         _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
         _moves.Push(move);
     }
-
     public void Undo(){
         if (!_moves.TryPop(out var move)) return;
         
@@ -515,6 +549,29 @@ public class Board{
         _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
     }
 
+    //Methodes d'aide au calcul de la valeur
+    public bool HaveBishopPair(Team team){
+        int count = 0;
+        foreach (var piece in _board){
+            if (piece == null) continue;
+            if (piece.Team == team && piece.GetTypeOfPiece() == typeof(Bishop)){
+                count++;
+                if (count >= 2) return true;
+            }
+        }
+
+        return false;
+    }
+    public bool HaveBishopPairAdvantage(Team team){
+        if (HaveBishopPair(team) && !HaveBishopPair(team == Team.Black ? Team.White : Team.Black)) return true;
+        return false;
+    }
+    public int CalculateMobility(Team team){
+        List<Move> moves = GetLegalMoves(team);
+        return moves.Count;
+    }
+    
+    //Methode de debug, ne pas utiliser
     public Vector2Int GetCoordinates(Piece piece){
         for (int x = 0; x < 8; x++){
             for (int y = 0; y < 8; y++){

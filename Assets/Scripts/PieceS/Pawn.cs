@@ -40,6 +40,6 @@ public class Pawn : Piece{
         return boardComponent.Sprites.Black.Pawn;
     }
     public override int GetValue(){
-        return 1;
+        return 100;
     }
 }

@@ -22,13 +22,13 @@ public class Node{
         _length = board.CurrentBoard.GetLength(1);
     }
 
-    public float CalculateValue(int player){
-        float value = 0;
+    public float CalculateValue(Team player){
+        int value = 0;
 
         if (IsTerminal){
             if (!_board.IsInCheck()) value = 0;
-            else if ((int) _board.CurrentPlayer == player) value = -1000;
-            else value = 1000;
+            else if (_board.CurrentPlayer == player) value = -100000;
+            else value = 100000;
             _board.Undo();
             return value;
         }
@@ -41,19 +41,19 @@ public class Node{
                 if (piece.Team == (Team)player){
                     value += piece.GetValue();
                     if ((x == 3 || x == 4) && (y == 3 || y == 4))
-                        value += 0.5f;
+                        value += 50;
                 }
                 else{
                     value -= piece.GetValue();
                     if ((x == 3 || x == 4) && (y == 3 || y == 4))
-                        value -= 0.5f;
+                        value -= 50;
                     
                     foreach (var move in piece.PossibleMoves(_board, new Vector2Int(x,y))){
                         if (move.Defender != null && move.Defender.Team == (Team)player)
                             value -= move.Defender.GetValue();
                         if ((move.EndingPosition.x == 3 || move.EndingPosition.x == 4) &&
                             (move.EndingPosition.y == 3 || move.EndingPosition.y == 4))
-                            value -= 0.5f;
+                            value -= 50;
                     }
                 }
             }
@@ -61,11 +61,16 @@ public class Node{
         
         foreach (var move in _possibleMoves){
             if ((move.EndingPosition.x == 3 || move.EndingPosition.x == 4) && (move.EndingPosition.y == 3 || move.EndingPosition.y == 4))
-                value += 0.5f;
+                value += 50;
             if (move.Defender != null && move.Defender.Team != (Team)player && move.Defender.GetValue() >= move.Attacker.GetValue())
-                value += (float)move.Defender.GetValue() / 3;
+                value += move.Defender.GetValue() / 3;
         }
 
+        if (_board.HaveBishopPairAdvantage(player)) value += 1;
+        else if (_board.HaveBishopPairAdvantage(player == Team.Black ? Team.White : Team.Black)) value -= 1;
+
+        value += _board.CalculateMobility(player);
+        
         _board.Undo();
         return value;
     }

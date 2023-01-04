@@ -40,6 +40,6 @@ public class Queen : Piece{
         return boardComponent.Sprites.Black.Queen;
     }
     public override int GetValue(){
-        return 9;
+        return 1000;
     }
 }

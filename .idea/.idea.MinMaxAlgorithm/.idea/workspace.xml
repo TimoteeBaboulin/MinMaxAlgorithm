@@ -18,15 +18,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.36368564" />
-    <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
-    <property name="Discover.Launch.Via.Unity" value="true" />
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="vue.rearranger.settings.migration" value="true" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Discover.Launch.Via.Unity": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="UnitTests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\2021.3.11f1\Editor\Unity.exe" />
@@ -46,10 +44,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="12824">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" />
+      <option name="pid" value="12824" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -75,6 +73,7 @@
       <workItem from="1672082889463" duration="1063000" />
       <workItem from="1672138096375" duration="3839000" />
       <workItem from="1672315024225" duration="4787000" />
+      <workItem from="1672818209140" duration="6869000" />
     </task>
     <servers />
   </component>
@@ -93,14 +92,7 @@
           <condition expression="(board[StartingPosition.x, StartingPosition.y] == null)" language="C#" />
           <url>file://$PROJECT_DIR$/Assets/Scripts/Pieces/Piece.cs</url>
           <line>39</line>
-          <properties documentPath="D:\Unity Projects\MinMaxAlgorithm\Assets\Scripts\PieceS\Piece.cs" initialLine="39" containingFunctionPresentation="method 'Do'">
-            <startOffsets>
-              <option value="1194" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1274" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="D:\Unity Projects\MinMaxAlgorithm\Assets\Scripts\PieceS\Piece.cs" initialLine="39" containingFunctionPresentation="method 'Do'" />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

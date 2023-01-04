@@ -33,6 +33,6 @@ public class Knight : Piece{
         return boardComponent.Sprites.Black.Knight;
     }
     public override int GetValue(){
-        return 3;
+        return 350;
     }
 }
