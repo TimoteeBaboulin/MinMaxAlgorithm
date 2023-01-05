@@ -28,7 +28,7 @@ public class BoardComponent : MonoBehaviour{
         PlayerVsAI
     }
     
-    public Piece[,] CurrentBoard;
+    private Piece[,] CurrentBoard=> _board.CurrentBoard;
     
     [NonSerialized] public List<Piece> PiecesEaten;
     [Header("Sprites")] 
@@ -71,41 +71,41 @@ public class BoardComponent : MonoBehaviour{
         //Get the starting position info
         GetStartingPosition();
         //Set up arrays
-        CurrentBoard = new Piece[8, 8];
         _possibleMoves = new List<GameObject>();
 
+        Piece[,] currentBoard = new Piece[8, 8];
         //Instantiate the pieces
-        for (int x = 0; x < CurrentBoard.GetLength(0); x++){
-            for (int y = 0; y < CurrentBoard.GetLength(1); y++){
-                if (_baseBoard[x,y] == 0) CurrentBoard[x,y] = null;
+        for (int x = 0; x < currentBoard.GetLength(0); x++){
+            for (int y = 0; y < currentBoard.GetLength(1); y++){
+                if (_baseBoard[x,y] == 0) currentBoard[x,y] = null;
 
                 int team = 0;
                 if (_baseBoard[x, y] < 0) team = 1;
 
                 switch (Math.Abs(_baseBoard[x,y])){
                     case 1:
-                        CurrentBoard[x, y] = new Pawn(team, new Vector2Int(x,y));
+                        currentBoard[x, y] = new Pawn(team, new Vector2Int(x,y));
                         break;
                     case 2:
-                        CurrentBoard[x, y] = new Knight(team, new Vector2Int(x,y));
+                        currentBoard[x, y] = new Knight(team, new Vector2Int(x,y));
                         break;
                     case 3:
-                        CurrentBoard[x, y] = new Bishop(team, new Vector2Int(x,y));
+                        currentBoard[x, y] = new Bishop(team, new Vector2Int(x,y));
                         break;
                     case 4:
-                        CurrentBoard[x, y] = new Rook(team, new Vector2Int(x,y));
+                        currentBoard[x, y] = new Rook(team, new Vector2Int(x,y));
                         break;
                     case 5:
-                        CurrentBoard[x, y] = new Queen(team, new Vector2Int(x,y));
+                        currentBoard[x, y] = new Queen(team, new Vector2Int(x,y));
                         break;
                     case 6:
-                        CurrentBoard[x, y] = new King(team, new Vector2Int(x,y));
+                        currentBoard[x, y] = new King(team, new Vector2Int(x,y));
                         break;
                 }
             }
         }
 
-        _board = new Board(CurrentBoard, (int)CurrentPlayer);
+        _board = new Board(currentBoard, (int)CurrentPlayer);
         //Draw the background tiles
         DrawBoard();
         InstantiatePieces();
@@ -215,7 +215,7 @@ public class BoardComponent : MonoBehaviour{
         int value = int.MinValue;
         Node bestNode = null;
         foreach (var child in currentPosition.Children){
-            int childValue = MinMax(child, _depth, int.MinValue, int.MaxValue, false);
+            int childValue = MinMax(child, _depth -1, int.MinValue, int.MaxValue, false);
             if (value < childValue){
                 value = childValue;
                 bestNode = child;
