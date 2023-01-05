@@ -2,31 +2,31 @@
 using UnityEngine;
 
 public class Bishop : Piece{
-    public Bishop(int team) : base(team){ }
+    public Bishop(int team, Vector2Int coord) : base(team, coord){ }
     
-    public override List<Move> PossibleMoves(Board board, Vector2Int coordinates){
+    public override List<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[coordinates.x, coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
         for (int horizontal = -1; horizontal <= 1; horizontal+=2){
             for (int vertical = -1; vertical <= 1; vertical+=2){
-                var actualCoordinates = coordinates;
+                var actualCoordinates = Coordinates;
                 actualCoordinates.x += vertical;
                 actualCoordinates.y += horizontal;
                 
                 while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
                     Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                     if (pieceBlocking == null){
-                        moves.Add(new Move(coordinates, actualCoordinates, this, null));
+                        moves.Add(new Move(Coordinates, actualCoordinates, this, null));
                         actualCoordinates.x += vertical;
                         actualCoordinates.y += horizontal;
                         continue;
                     }
                 
                     if (pieceBlocking.Team != Team) 
-                        moves.Add(new Move(coordinates, actualCoordinates, this, pieceBlocking));
+                        moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
                 
                     break;
                 }

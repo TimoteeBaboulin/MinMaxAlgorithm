@@ -5,12 +5,14 @@ using UnityEngine;
 public abstract class Piece{
     public readonly Team Team;
     public bool HasMoved;
+    public Vector2Int Coordinates;
 
-    protected Piece(int team){
+    protected Piece(int team, Vector2Int coord){
         Team = (Team)team;
+        Coordinates = coord;
     }
 
-    public abstract List<Move> PossibleMoves(Board currentBoard, Vector2Int coordinates);
+    public abstract List<Move> PossibleMoves(Board currentBoard);
     public abstract Sprite GetSprite(BoardComponent boardComponent);
     public abstract int GetValue();
 

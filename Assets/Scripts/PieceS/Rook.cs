@@ -6,15 +6,15 @@ public class Rook : Piece{
         Vector2Int.down, Vector2Int.left, Vector2Int.right, Vector2Int.up
     };
 
-    public Rook(int team) : base(team){ }
+    public Rook(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board, Vector2Int coordinates){
+    public override List<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[coordinates.x, coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
-        var actualCoordinates = coordinates;
+        var actualCoordinates = Coordinates;
         
         for (int horizontal = -1; horizontal <= 1; horizontal+=2){
             actualCoordinates.y += horizontal;
@@ -22,18 +22,18 @@ public class Rook : Piece{
             while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
                 Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                 if (pieceBlocking == null){
-                    moves.Add(new Move(coordinates, actualCoordinates, this, null));
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, null));
                     actualCoordinates.y += horizontal;
                     continue;
                 }
                 
                 if (pieceBlocking.Team != Team) 
-                    moves.Add(new Move(coordinates, actualCoordinates, this, pieceBlocking));
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
                 
                 break;
             }
 
-            actualCoordinates = coordinates;
+            actualCoordinates = Coordinates;
         }
         
         for (int vertical = -1; vertical <= 1; vertical++){
@@ -42,36 +42,19 @@ public class Rook : Piece{
             while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
                 Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                 if (pieceBlocking == null){
-                    moves.Add(new Move(coordinates, actualCoordinates, this, null));
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, null));
                     actualCoordinates.x += vertical;
                     continue;
                 }
                 
                 if (pieceBlocking.Team != Team) 
-                    moves.Add(new Move(coordinates, actualCoordinates, this, pieceBlocking));
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
                 
                 break;
             }
 
-            actualCoordinates = coordinates;
+            actualCoordinates = Coordinates;
         }
-        
-        // foreach (var direction in Directions){
-        //     var range = 1;
-        //     var actualCoordinates = coordinates;
-        //     Piece pieceBlocking = null;
-        //     while (!IsOutOfBounds(board, actualCoordinates) && (pieceBlocking = GetPieceAt(board, actualCoordinates)) == null){
-        //         moves.Add(new Move(coordinates, actualCoordinates, this, null));
-        //
-        //         range++;
-        //         actualCoordinates = coordinates + direction * range;
-        //     }
-        //
-        //     
-        //     if (!IsOutOfBounds(board, actualCoordinates) && pieceBlocking != null && pieceBlocking.Team != Team){
-        //         moves.Add(new Move(coordinates, actualCoordinates, this, pieceBlocking));
-        //     }
-        // }
 
         return moves;
     }

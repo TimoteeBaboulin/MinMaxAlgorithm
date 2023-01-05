@@ -7,18 +7,18 @@ public class King : Piece{
         new(1, 1), new(1, -1), new(-1, -1), new(-1, 1)
     };
     
-    public King(int team) : base(team){ }
+    public King(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board, Vector2Int coordinates){
+    public override List<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[coordinates.x, coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
         foreach (var direction in Directions){
-            var actualCoordinates = coordinates + direction;
+            var actualCoordinates = Coordinates + direction;
             if (!IsOutOfBounds(currentBoard, actualCoordinates) && (GetPieceAt(currentBoard, actualCoordinates) == null || GetPieceAt(currentBoard, actualCoordinates).Team != Team))
-                moves.Add(new Move(coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates)));
+                moves.Add(new Move(Coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates)));
         }
 
         return moves;

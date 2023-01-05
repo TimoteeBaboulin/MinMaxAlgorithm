@@ -399,7 +399,7 @@ MonoBehaviour:
   _tileParent: {fileID: 862713211}
   _tileBase: {fileID: 2389774468048913912, guid: f07605ca9cb8fc74ba4d822c0044c73e, type: 3}
   CurrentPlayer: 0
-  _depth: 3
+  _depth: 4
   _timeBetweenMoves: 2
   _startingPosition: 0
   _gameMode: 0

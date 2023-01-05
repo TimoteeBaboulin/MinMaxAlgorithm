@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -26,10 +27,9 @@ public class BoardComponent : MonoBehaviour{
         AIvsAI,
         PlayerVsAI
     }
-
     
     public Piece[,] CurrentBoard;
-    private Board _board;
+    
     [NonSerialized] public List<Piece> PiecesEaten;
     [Header("Sprites")] 
     public PieceSprites Sprites;
@@ -49,6 +49,9 @@ public class BoardComponent : MonoBehaviour{
     [SerializeField] private GameMode _gameMode;
     [SerializeField] private Team _humanPlayer;
     
+    //Actual board
+    private Board _board;
+    
     //Base board
     private int[,] _baseBoard;
     
@@ -56,10 +59,7 @@ public class BoardComponent : MonoBehaviour{
     private GameObject[,] _tiles;
     private List<GameObject> _possibleMoves;
     private GameObject[,] _pieces;
-    private List<GameObject> _piecesTaken;
 
-    //Useless once Negamax is reworked
-    private Move _bestMove;
     //Used to update the piece positions without efficiency issues
     private Move _lastMove;
 
@@ -73,7 +73,6 @@ public class BoardComponent : MonoBehaviour{
         //Set up arrays
         CurrentBoard = new Piece[8, 8];
         _possibleMoves = new List<GameObject>();
-        _piecesTaken = new List<GameObject>();
 
         //Instantiate the pieces
         for (int x = 0; x < CurrentBoard.GetLength(0); x++){
@@ -85,27 +84,22 @@ public class BoardComponent : MonoBehaviour{
 
                 switch (Math.Abs(_baseBoard[x,y])){
                     case 1:
-                        CurrentBoard[x, y] = new Pawn(team);
+                        CurrentBoard[x, y] = new Pawn(team, new Vector2Int(x,y));
                         break;
-                    
                     case 2:
-                        CurrentBoard[x, y] = new Knight(team);
+                        CurrentBoard[x, y] = new Knight(team, new Vector2Int(x,y));
                         break;
-                    
                     case 3:
-                        CurrentBoard[x, y] = new Bishop(team);
+                        CurrentBoard[x, y] = new Bishop(team, new Vector2Int(x,y));
                         break;
-                    
                     case 4:
-                        CurrentBoard[x, y] = new Rook(team);
+                        CurrentBoard[x, y] = new Rook(team, new Vector2Int(x,y));
                         break;
-                    
                     case 5:
-                        CurrentBoard[x, y] = new Queen(team);
+                        CurrentBoard[x, y] = new Queen(team, new Vector2Int(x,y));
                         break;
-                    
                     case 6:
-                        CurrentBoard[x, y] = new King(team);
+                        CurrentBoard[x, y] = new King(team, new Vector2Int(x,y));
                         break;
                 }
             }
@@ -124,7 +118,6 @@ public class BoardComponent : MonoBehaviour{
         CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
         
         UpdatePieces();
-        // DrawPossibleMoves();
     }
 
     private void InstantiatePieces(){
@@ -154,7 +147,6 @@ public class BoardComponent : MonoBehaviour{
         
         if (_lastMove.Defender != null){
             _pieces[end.x, end.y].SetActive(false);
-            _piecesTaken.Add(_pieces[end.x, end.y]);
         }
         _pieces[start.x, start.y].transform.position =
             new Vector3(4 - end.y - 0.5f, 4 - end.x - 0.5f, 0);
@@ -201,211 +193,71 @@ public class BoardComponent : MonoBehaviour{
             _possibleMoves.Add(newTile);
         }
     }
-    
-    // private void NegaMaxSetUp(){
-    //     Stopwatch stopwatch = new Stopwatch();
-    //     stopwatch.Start();
-    //
-    //     _bestMove = null;
-    //     
-    //     Node currentPosition = new Node((Piece[,])CurrentBoard.Clone(), null);
-    //     float value = -NegaMax(currentPosition, _depth, 1);
-    //     Debug.Log("Chose move with value: " + value);
-    //
-    //     if (_bestMove == null){
-    //         Debug.Log("Couldn't find move");
-    //         return;
-    //     }
-    //     
-    //     _bestMove.Do(CurrentBoard);
-    //     
-    //     Debug.Log("Ce coups a pris: " + stopwatch.Elapsed.ToString() + " secondes.");
-    //     stopwatch.Stop();
-    // }
-    // private void NegaMaxAlphaBetaSetUp(){
-    //     Stopwatch stopwatch = new Stopwatch();
-    //     stopwatch.Start();
-    //
-    //     _bestMove = null;
-    //     
-    //     Node currentPosition = new Node((Piece[,])CurrentBoard.Clone(), null);
-    //     float value = -NegaMax(currentPosition, _depth, -1000, 1000, 1);
-    //     Debug.Log("Chose move with value: " + value);
-    //
-    //     if (_bestMove == null){
-    //         Debug.Log("Couldn't find move");
-    //         return;
-    //     }
-    //     
-    //     _bestMove.Do(CurrentBoard);
-    //     
-    //     Debug.Log("Ce coups a pris: " + stopwatch.Elapsed.ToString() + " secondes.");
-    //     stopwatch.Stop();
-    // }
-    //
-    // private void MinMaxSetUp(){
-    //     Stopwatch stopwatch = new Stopwatch();
-    //     stopwatch.Start();
-    //     
-    //     Node currentPosition = new Node((Piece[,])CurrentBoard.Clone(), null);
-    //     float value = MinMax(currentPosition, _depth, false, out Move bestMove);
-    //     Debug.Log("Chose move with value: " + value);
-    //     
-    //     if (bestMove == null){
-    //         Debug.Log("Couldn't find move");
-    //         return;
-    //     }
-    //     
-    //     bestMove.Do(CurrentBoard);
-    //     
-    //     Debug.Log("Ce coups a pris: " + stopwatch.Elapsed.ToString() + " secondes.");
-    //     stopwatch.Stop();
-    // }
+
     private void MinMaxAlphaBetaSetUp(){
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        
-        Node currentPosition = new Node(_board, null);
-        float value = MinMax(currentPosition, _depth, -1500, 1500, true, out Move bestMove);
 
-        if (bestMove == null){
-            Debug.Log("Couldn't find move");
+        string log;
+        
+        Node currentPosition = new Node(_board, null, CurrentPlayer);
+
+        if (currentPosition.IsTerminal){
+            if (_board.IsInCheck())
+                log = "CheckMate";
+            else 
+                log = "Pat";
+            Debug.Log(log);
             return;
         }
+        
+        currentPosition.GenerateChildren();
+        int value = int.MinValue;
+        Node bestNode = null;
+        foreach (var child in currentPosition.Children){
+            int childValue = MinMax(child, _depth, int.MinValue, int.MaxValue, false);
+            if (value < childValue){
+                value = childValue;
+                bestNode = child;
+            }
+        }
 
-        string log = "Valeur du coups: " + value + "\nCe coups a pris: " + stopwatch.Elapsed;
+        log = "Valeur du coups: " + value + "\nCe coups a pris: " + stopwatch.Elapsed;
         Debug.Log(log);
         
-        _board.Do(bestMove);
-        _lastMove = bestMove;
+        _board.Do(bestNode.Move);
+        _lastMove = bestNode.Move;
 
         stopwatch.Stop();
     }
 
-    // private float NegaMax(Node node, int depth, int color){
-    //     node.GenerateMoves(CurrentPlayer);
-    //     if (depth == 0 || node.IsTerminal)
-    //         return node.CalculateValue(CurrentPlayer) * color;
-    //     
-    //     node.GenerateChildren();
-    //     float value = -1000;
-    //     foreach (var child in node.Children){
-    //         float childValue = NegaMax(child, depth - 1, -color);
-    //         if (value < childValue){
-    //             value = childValue;
-    //             _bestMove = child.Move;
-    //         }
-    //     }
-    //
-    //     return value;
-    // }
-    // private float NegaMax(Node node, int depth, float alpha, float beta, int color){
-    //     int player;
-    //     if (color == -1)
-    //         player = CurrentPlayer == 0 ? 1 : 0;
-    //     else
-    //         player = CurrentPlayer;
-    //     
-    //     node.GenerateMoves(player);
-    //     if (depth == 0 || node.IsTerminal)
-    //         return node.CalculateValue(CurrentPlayer) * color;
-    //     
-    //     node.GenerateChildren();
-    //     float value = -1000;
-    //     foreach (var child in node.Children){
-    //         float childValue = -NegaMax(child, depth - 1, -beta, -alpha, -color);
-    //         if (value < childValue){
-    //             value = childValue;
-    //             _bestMove = child.Move;
-    //         }
-    //
-    //         alpha = Math.Max(alpha, value);
-    //         if (alpha >= beta)
-    //             break;
-    //
-    //     }
-    //
-    //     return value;
-    // }
-    //
-    // private float MinMax(Node node, int depth, bool maximizing, out Move bestMove){
-    //     int player;
-    //     if (!maximizing)
-    //         player = CurrentPlayer == 0 ? 1 : 0;
-    //     else
-    //         player = CurrentPlayer;
-    //     node.GenerateMoves(player);
-    //
-    //     bestMove = node.Move;
-    //     
-    //     if (depth == 0 || node.IsTerminal){
-    //         bestMove = node.Move;
-    //         return node.CalculateValue(CurrentPlayer);
-    //     }
-    //     
-    //     node.GenerateChildren();
-    //
-    //     float value;
-    //     if (maximizing){
-    //         value = -1000;
-    //         foreach (var child in node.Children){
-    //             float childValue = MinMax(child, depth - 1, false, out Move move);
-    //             if (childValue > value){
-    //                 bestMove = child.Move;
-    //                 value = childValue;
-    //             }
-    //         }
-    //     }
-    //     else{
-    //         value = 1000;
-    //         foreach (var child in node.Children){
-    //             float childValue = MinMax(child, depth - 1, true, out Move move);
-    //             if (childValue < value){
-    //                 bestMove = child.Move;
-    //                 value = childValue;
-    //             }
-    //         }
-    //     }
-    //
-    //     return value;
-    // }
-    private float MinMax(Node node, int depth, float alpha, float beta, bool maximizing, out Move bestMove){
-        node.GenerateMoves();
+    private int MinMax(Node node, int depth, float alpha, float beta, bool maximizing){
+        node.DoMove();
 
-        bestMove = node.Move;
-        
         if (depth == 0 || node.IsTerminal){
-            bestMove = node.Move;
-            return node.CalculateValue(CurrentPlayer);
+            node.UndoMove();
+            return node.CalculateValue();
         }
-        
+
         node.GenerateChildren();
 
-        float value;
+        int value;
         if (maximizing){
-            value = -1000;
+            value = int.MinValue;
             foreach (var child in node.Children){
-                var childValue = MinMax(child, depth - 1, alpha, beta, false, out Move move);
-                if (childValue > value){
-                    bestMove = child.Move;
-                    value = childValue;
-                }
+                value = Mathf.Max(value, MinMax(child, depth - 1, alpha, beta, false));
 
+                if (value > beta) break;
                 alpha = Math.Max(alpha, value);
-                if (value >= beta) break;
             }
         }
         else{
-            value = 1000;
+            value = int.MaxValue;
             foreach (var child in node.Children){
-                float childValue = MinMax(child, depth - 1, alpha, beta, true, out Move move);
-                if (childValue < value){
-                    bestMove = child.Move;
-                    value = childValue;
-                }
-
+                value = Mathf.Min(value, MinMax(child, depth - 1, alpha, beta, true));
+                
+                if (value < alpha) break;
                 beta = Math.Max(beta, value);
-                if (value <= alpha) break;
             }
         }
 
@@ -448,138 +300,5 @@ public class BoardComponent : MonoBehaviour{
             default:
                 throw new ArgumentOutOfRangeException();
         }
-    }
-}
-
-public class Board{
-    private readonly Piece[,] _board;
-    public Piece[,] CurrentBoard => _board;
-    private Team _player;
-    public Team CurrentPlayer => _player;
-
-    private List<Piece>[] _teamPieces;
-    private readonly Stack<Move> _moves;
-    private readonly Bishop[,] _bishops;
-    
-    public Board(Piece[,] baseBoard, int currentPlayer){
-        _board = baseBoard;
-        _player = (Team)currentPlayer;
-        _moves = new Stack<Move>();
-        
-        _teamPieces = new List<Piece>[2];
-        _teamPieces[0] = new List<Piece>();
-        _teamPieces[1] = new List<Piece>();
-        foreach (var piece in _board){
-            if (piece != null)
-                _teamPieces[(int)piece.Team].Add(piece);
-        }
-    }
-
-    //Methodes liees au calcul des moves
-    public List<Move> GetLegalMoves(){
-        List<Move> moves = new List<Move>();
-        for (int x = 0; x < _board.GetLength(0); x++){
-            for (int y = 0; y < _board.GetLength(1); y++){
-                Piece piece = _board[x, y];
-                if (piece == null || piece.Team != _player) continue;
-                moves.AddRange(piece.PossibleMoves(this, new Vector2Int(x,y)));
-            }
-        }
-
-        for (int x = moves.Count - 1; x >= 0; x--){
-            var currentMove = moves[x];
-            currentMove.Do(_board);
-
-            if (IsInCheck()) moves.Remove(moves[x]);
-            currentMove.Undo(_board);
-        }
-
-        return moves;
-    }
-
-    public List<Move> GetLegalMoves(Team team){
-        List<Move> moves = new List<Move>();
-        for (int x = 0; x < _board.GetLength(0); x++){
-            for (int y = 0; y < _board.GetLength(1); y++){
-                Piece piece = _board[x, y];
-                if (piece == null || piece.Team != team) continue;
-                moves.AddRange(piece.PossibleMoves(this, new Vector2Int(x,y)));
-            }
-        }
-
-        for (int x = moves.Count - 1; x >= 0; x--){
-            var currentMove = moves[x];
-            currentMove.Do(_board);
-
-            if (IsInCheck()) moves.Remove(moves[x]);
-            currentMove.Undo(_board);
-        }
-
-        return moves;
-    }
-    public bool IsInCheck(){
-        List<Move> moves = new List<Move>();
-        for (int x = 0; x < _board.GetLength(0); x++){
-            for (int y = 0; y < _board.GetLength(1); y++){
-                Piece piece = _board[x, y];
-                if (piece == null || piece.Team == _player) continue;
-                moves.AddRange(piece.PossibleMoves(this, new Vector2Int(x,y)));
-            }
-        }
-
-        foreach (var move in moves){
-            if (move.Defender != null && move.Defender.GetValue() == 0)
-                return true;
-        }
-
-        return false;
-    }
-
-    //Joues un coups, ou revient un coups en arriere
-    public void Do(Move move){
-        
-        move.Do(_board);
-        _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
-        _moves.Push(move);
-    }
-    public void Undo(){
-        if (!_moves.TryPop(out var move)) return;
-        
-        move.Undo(_board);
-        _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
-    }
-
-    //Methodes d'aide au calcul de la valeur
-    public bool HaveBishopPair(Team team){
-        int count = 0;
-        foreach (var piece in _board){
-            if (piece == null) continue;
-            if (piece.Team == team && piece.GetTypeOfPiece() == typeof(Bishop)){
-                count++;
-                if (count >= 2) return true;
-            }
-        }
-
-        return false;
-    }
-    public bool HaveBishopPairAdvantage(Team team){
-        if (HaveBishopPair(team) && !HaveBishopPair(team == Team.Black ? Team.White : Team.Black)) return true;
-        return false;
-    }
-    public int CalculateMobility(Team team){
-        List<Move> moves = GetLegalMoves(team);
-        return moves.Count;
-    }
-    
-    //Methode de debug, ne pas utiliser
-    public Vector2Int GetCoordinates(Piece piece){
-        for (int x = 0; x < 8; x++){
-            for (int y = 0; y < 8; y++){
-                if (_board[x, y] == piece)
-                    return new Vector2Int(x, y);
-            }
-        }
-
-        return new Vector2Int(0, 0);
     }
 }

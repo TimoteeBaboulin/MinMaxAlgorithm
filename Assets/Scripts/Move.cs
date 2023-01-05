@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using UnityEditor.Experimental.GraphView;
+using UnityEngine;
 
 public class Move{
     public Vector2Int StartingPosition;
     public Vector2Int EndingPosition;
-    public Piece Attacker;
-    public Piece Defender;
+    public readonly Piece Attacker;
+    public readonly Piece Defender;
 
     private bool _didAttackerMoveBefore;
 
@@ -16,11 +17,12 @@ public class Move{
     }
 
     public void Do(Piece[,] board){
-        _didAttackerMoveBefore = board[StartingPosition.x, StartingPosition.y].HasMoved;
+        _didAttackerMoveBefore = Attacker.HasMoved;
 
         board[StartingPosition.x, StartingPosition.y] = null;
         board[EndingPosition.x, EndingPosition.y] = Attacker;
-        
+        Attacker.Coordinates = EndingPosition;
+
         Attacker.HasMoved = true;
     }
 
@@ -28,6 +30,7 @@ public class Move{
         board[StartingPosition.x, StartingPosition.y] = Attacker;
         board[EndingPosition.x, EndingPosition.y] = Defender;
 
-        board[StartingPosition.x, StartingPosition.y].HasMoved = _didAttackerMoveBefore;
+        Attacker.HasMoved = _didAttackerMoveBefore;
+        Attacker.Coordinates = StartingPosition;
     }
 }

@@ -7,28 +7,28 @@ public class Queen : Piece{
         new(1, 1), new(1, -1), new(-1, -1), new(-1, 1)
     };
     
-    public Queen(int team) : base(team){ }
+    public Queen(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board, Vector2Int coordinates){
+    public override List<Move> PossibleMoves(Board board){
         var currentBoard= board.CurrentBoard;
-        if (currentBoard[coordinates.x, coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
         foreach (var direction in Directions){
             var range = 1;
-            var actualCoordinates = coordinates + direction * range;
+            var actualCoordinates = Coordinates + direction * range;
             Piece pieceBlocking = null;
             while (!IsOutOfBounds(currentBoard, actualCoordinates) && (pieceBlocking = GetPieceAt(currentBoard, actualCoordinates)) == null){
-                moves.Add(new Move(coordinates, actualCoordinates, this, null));
+                moves.Add(new Move(Coordinates, actualCoordinates, this, null));
         
                 range++;
-                actualCoordinates = coordinates + direction * range;
+                actualCoordinates = Coordinates + direction * range;
             }
 
             
             if (!IsOutOfBounds(currentBoard, actualCoordinates) && pieceBlocking != null && pieceBlocking.Team != Team){
-                moves.Add(new Move(coordinates, actualCoordinates, this, pieceBlocking));
+                moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
             }
         }
 
