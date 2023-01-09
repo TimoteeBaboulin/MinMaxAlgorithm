@@ -35,4 +35,8 @@ public class Knight : Piece{
     public override int GetValue(){
         return 350;
     }
+    
+    public override int GetID(){
+        return Team == Team.White ? 1 : 7;
+    }
 }

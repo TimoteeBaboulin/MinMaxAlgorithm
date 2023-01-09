@@ -31,4 +31,8 @@ public class King : Piece{
     public override int GetValue(){
         return 0;
     }
+    
+    public override int GetID(){
+        return Team == Team.White ? 5 : 11;
+    }
 }

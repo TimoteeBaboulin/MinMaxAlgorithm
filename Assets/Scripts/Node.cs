@@ -30,8 +30,9 @@ public class Node{
             return value;
         }
 
+        List<Piece> teamPieces = _board.GetPieceFromTeam(_player);
         //Count material value
-        foreach (var piece in _board.GetPieceFromTeam(_player)){
+        foreach (var piece in teamPieces){
             value += piece.GetValue();
             value += PieceSquareTables.GetValue(piece);
         }
@@ -42,7 +43,7 @@ public class Node{
         }
 
         //Vérifies que toutes les pieces soient développées
-        foreach (var piece in _board.GetPieceFromTeam(_player)){
+        foreach (var piece in teamPieces){
             Type pieceType = piece.GetTypeOfPiece();
             if ((pieceType == typeof(Bishop) || pieceType == typeof(Knight)) && !piece.HasMoved){
                 value -= 50;
@@ -56,6 +57,8 @@ public class Node{
         //Take mobility into account
         value += Mobility * 10;
 
+        UndoMove();
+        
         return value;
     }
 

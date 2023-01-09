@@ -66,4 +66,8 @@ public class Rook : Piece{
     public override int GetValue(){
         return 525;
     }
+    
+    public override int GetID(){
+        return Team == Team.White ? 3 : 9;
+    }
 }

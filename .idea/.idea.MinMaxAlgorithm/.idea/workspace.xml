@@ -8,6 +8,8 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/UIBehaviour.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -44,10 +46,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="19364">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" />
+      <option name="pid" value="19364" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -75,7 +77,7 @@
       <workItem from="1672315024225" duration="4787000" />
       <workItem from="1672818209140" duration="6869000" />
       <workItem from="1672904923298" duration="20139000" />
-      <workItem from="1673247768416" duration="5823000" />
+      <workItem from="1673247768416" duration="14093000" />
     </task>
     <servers />
   </component>
@@ -96,6 +98,32 @@
           <line>39</line>
           <properties documentPath="D:\Unity Projects\MinMaxAlgorithm\Assets\Scripts\PieceS\Piece.cs" initialLine="39" containingFunctionPresentation="method 'Do'" />
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/BoardComponent.cs</url>
+          <line>204</line>
+          <properties documentPath="C:\Users\t.baboulin\Documents\LocalRepositories\MinMaxAlgorithm\Assets\Scripts\BoardComponent.cs" initialLine="195" containingFunctionPresentation="method 'MinMaxAlphaBetaSetUp'">
+            <startOffsets>
+              <option value="6732" />
+            </startOffsets>
+            <endOffsets>
+              <option value="6733" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Board.cs</url>
+          <line>82</line>
+          <properties documentPath="C:\Users\t.baboulin\Documents\LocalRepositories\MinMaxAlgorithm\Assets\Scripts\Board.cs" initialLine="72" containingFunctionPresentation="method 'GetLegalMoves'">
+            <startOffsets>
+              <option value="2585" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2586" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

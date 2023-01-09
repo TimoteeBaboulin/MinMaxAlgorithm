@@ -42,4 +42,8 @@ public class Queen : Piece{
     public override int GetValue(){
         return 1000;
     }
+    
+    public override int GetID(){
+        return Team == Team.White ? 4 : 10;
+    }
 }

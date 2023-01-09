@@ -13,11 +13,11 @@ public class Pawn : Piece{
         int forward = Team == 0 ? -1 : 1;
         Vector2Int actualCoordinates = Coordinates;
         actualCoordinates.x += forward;
-        if (!IsOutOfBounds(currentBoard, actualCoordinates) && GetPieceAt(currentBoard, actualCoordinates) == null){
+        if (!IsOutOfBounds(currentBoard, actualCoordinates) && currentBoard[actualCoordinates.x, actualCoordinates.y] == null){
             moves.Add(new Move(Coordinates, actualCoordinates, this, null));
 
             actualCoordinates.x += forward;
-            if (!HasMoved && !IsOutOfBounds(currentBoard, actualCoordinates) && GetPieceAt(currentBoard, actualCoordinates) == null) 
+            if (!HasMoved && !IsOutOfBounds(currentBoard, actualCoordinates) && currentBoard[actualCoordinates.x, actualCoordinates.y] == null) 
                 moves.Add(new Move(Coordinates, actualCoordinates, this, null));
         }
 
@@ -27,7 +27,7 @@ public class Pawn : Piece{
         for (int horizontal = -1; horizontal <=1; horizontal+=2){
             actualCoordinates.y += horizontal;
             Piece possiblePiece = null;
-            if (!IsOutOfBounds(currentBoard, actualCoordinates) && (possiblePiece = GetPieceAt(currentBoard, actualCoordinates)) != null && possiblePiece.Team != Team) 
+            if (!IsOutOfBounds(currentBoard, actualCoordinates) && (possiblePiece = currentBoard[actualCoordinates.x, actualCoordinates.y]) != null && possiblePiece.Team != Team) 
                 moves.Add(new Move(Coordinates, actualCoordinates, this, possiblePiece)); 
             actualCoordinates.y -= horizontal;
         }
@@ -41,5 +41,9 @@ public class Pawn : Piece{
     }
     public override int GetValue(){
         return 100;
+    }
+
+    public override int GetID(){
+        return Team == Team.White ? 0 : 6;
     }
 }

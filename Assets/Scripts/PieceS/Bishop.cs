@@ -46,4 +46,8 @@ public class Bishop : Piece{
     public override int GetValue(){
         return 350;
     }
+
+    public override int GetID(){
+        return Team == Team.White ? 2 : 8;
+    }
 }

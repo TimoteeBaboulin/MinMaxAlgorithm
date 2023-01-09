@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Random = System.Random;
 
 public enum Team{
     Black = 1,
@@ -65,6 +66,11 @@ public class BoardComponent : MonoBehaviour{
     //Used for the timer
     private float _time;
 
+    private int[,] _hashes = new int[64,12];
+    private int[] _hashTeamToPlay = new int[2];
+
+    
+
     private void Start(){
         _pieces = new GameObject[8,8];
         //Get the starting position info
@@ -113,7 +119,10 @@ public class BoardComponent : MonoBehaviour{
         _time += Time.deltaTime;
         if (_time < _timeBetweenMoves) return;
         _time = 0;
+        
+        
         MinMaxAlphaBetaSetUp();
+        Debug.Log(_board.Hash);
         CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
         
         UpdatePieces();
@@ -236,7 +245,6 @@ public class BoardComponent : MonoBehaviour{
         node.DoMove();
 
         if (depth == 0 || node.IsTerminal){
-            node.UndoMove();
             return node.CalculateValue();
         }
 
