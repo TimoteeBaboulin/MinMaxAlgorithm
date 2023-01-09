@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using UnityEngine.UI;
 
 public class Node{
     public readonly Move Move;
@@ -18,6 +21,7 @@ public class Node{
     public int CalculateValue(){
         int value = 0;
 
+        //Check for mate or pat
         if (IsTerminal){
             if (!_board.IsInCheck()) value = 0;
             else if (_board.CurrentPlayer == _player) value = int.MinValue;
@@ -26,6 +30,7 @@ public class Node{
             return value;
         }
 
+        //Count material value
         foreach (var piece in _board.GetPieceFromTeam(_player)){
             value += piece.GetValue();
             value += PieceSquareTables.GetValue(piece);
@@ -36,11 +41,21 @@ public class Node{
             value -= PieceSquareTables.GetValue(piece);
         }
 
+        //Vérifies que toutes les pieces soient développées
+        foreach (var piece in _board.GetPieceFromTeam(_player)){
+            Type pieceType = piece.GetTypeOfPiece();
+            if ((pieceType == typeof(Bishop) || pieceType == typeof(Knight)) && !piece.HasMoved){
+                value -= 50;
+            }
+        }
+        
+        //Check for bishop pairs
         if (_board.HaveBishopPairAdvantage(_player)) value += 100;
         else if (_board.HaveBishopPairAdvantage(_player == Team.Black ? Team.White : Team.Black)) value -= 1;
 
+        //Take mobility into account
         value += Mobility * 10;
-        
+
         return value;
     }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.NetworkInformation;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -203,13 +202,13 @@ public class BoardComponent : MonoBehaviour{
         Node currentPosition = new Node(_board, null, CurrentPlayer);
 
         if (currentPosition.IsTerminal){
-            if (_board.IsInCheck())
-                log = "CheckMate";
-            else 
-                log = "Pat";
+            log = _board.IsInCheck() ? "CheckMate" : "Pat";
             Debug.Log(log);
             return;
         }
+
+        int alpha = int.MinValue;
+        int beta = int.MaxValue;
         
         currentPosition.GenerateChildren();
         int value = int.MinValue;
@@ -220,11 +219,13 @@ public class BoardComponent : MonoBehaviour{
                 value = childValue;
                 bestNode = child;
             }
+
+            alpha = Math.Max(alpha, value);
         }
 
         log = "Valeur du coups: " + value + "\nCe coups a pris: " + stopwatch.Elapsed;
         Debug.Log(log);
-        
+
         _board.Do(bestNode.Move);
         _lastMove = bestNode.Move;
 
@@ -257,7 +258,7 @@ public class BoardComponent : MonoBehaviour{
                 value = Mathf.Min(value, MinMax(child, depth - 1, alpha, beta, true));
                 
                 if (value < alpha) break;
-                beta = Math.Max(beta, value);
+                beta = Math.Min(beta, value);
             }
         }
 
@@ -266,39 +267,18 @@ public class BoardComponent : MonoBehaviour{
     }
 
     private void GetStartingPosition(){
-        switch (_startingPosition){
-            case StartingPosition.Standard:
-                _baseBoard = BaseBoards.Standard;
-                break;
-            case StartingPosition.PawnTest:
-                _baseBoard = BaseBoards.PawnMoveTest;
-                break;
-            case StartingPosition.KnightTest:
-                _baseBoard = BaseBoards.KnightMoveTest;
-                break;
-            case StartingPosition.BishopTest:
-                _baseBoard = BaseBoards.BishopMoveTest;
-                break;
-            case StartingPosition.RookTest:
-                _baseBoard = BaseBoards.RookMoveTest;
-                break;
-            case StartingPosition.QueenTest:
-                _baseBoard = BaseBoards.QueenMoveTest;
-                break;
-            case StartingPosition.KingTest:
-                _baseBoard = BaseBoards.KingMoveTest;
-                break;
-            case StartingPosition.CheckTest:
-                _baseBoard = BaseBoards.CheckTest;
-                break;
-            case StartingPosition.CheckMateTest:
-                _baseBoard = BaseBoards.CheckMateTest;
-                break;
-            case StartingPosition.BishopPairTest:
-                _baseBoard = BaseBoards.BishopPairTest;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        _baseBoard = _startingPosition switch{
+            StartingPosition.Standard => BaseBoards.Standard,
+            StartingPosition.PawnTest => BaseBoards.PawnMoveTest,
+            StartingPosition.KnightTest => BaseBoards.KnightMoveTest,
+            StartingPosition.BishopTest => BaseBoards.BishopMoveTest,
+            StartingPosition.RookTest => BaseBoards.RookMoveTest,
+            StartingPosition.QueenTest => BaseBoards.QueenMoveTest,
+            StartingPosition.KingTest => BaseBoards.KingMoveTest,
+            StartingPosition.CheckTest => BaseBoards.CheckTest,
+            StartingPosition.CheckMateTest => BaseBoards.CheckMateTest,
+            StartingPosition.BishopPairTest => BaseBoards.BishopPairTest,
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }
