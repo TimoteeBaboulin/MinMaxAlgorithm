@@ -77,6 +77,8 @@ public class Board{
             currentMove.Undo(_board);
         }
 
+        moves.Sort((a, b) => a.GuessValue(this) - b.GuessValue(this));
+        
         return moves;
     }
 

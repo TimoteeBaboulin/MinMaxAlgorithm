@@ -67,6 +67,7 @@ public class BoardComponent : MonoBehaviour{
     private float _time;
 
     private int _hashCutoffs;
+    private int _totalLinesCalculated;
 
     private void Start(){
         _pieces = new GameObject[8,8];
@@ -112,14 +113,16 @@ public class BoardComponent : MonoBehaviour{
         DrawBoard();
         InstantiatePieces();
     }
+    
     private void Update(){
         _time += Time.deltaTime;
         if (_time < _timeBetweenMoves) return;
         _time = 0;
 
         _hashCutoffs = 0;
+        _totalLinesCalculated = 0;
         MinMaxAlphaBetaSetUp();
-        Debug.Log("Transposition cutoffs: " + _hashCutoffs);
+        Debug.Log("Transposition cutoffs: " + _hashCutoffs + "\nTotal lines calculated: " + _totalLinesCalculated);
         CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
         
         UpdatePieces();
@@ -244,6 +247,7 @@ public class BoardComponent : MonoBehaviour{
         if (depth == 0 || node.IsTerminal){
             var nodeValue = node.CalculateValue();
             TranspositionTable.Add(_board.Hash, nodeValue, depth);
+            _totalLinesCalculated++;
             return nodeValue;
         }
 

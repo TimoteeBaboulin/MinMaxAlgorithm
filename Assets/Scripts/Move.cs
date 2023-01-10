@@ -33,4 +33,17 @@ public class Move{
         Attacker.HasMoved = _didAttackerMoveBefore;
         Attacker.Coordinates = StartingPosition;
     }
+
+    public int GuessValue(Board board){
+        // board.Do(this);
+        // if (TranspositionTable.Contains(board.Hash)){
+        //     var value = TranspositionTable.Table[board.Hash][0];
+        //     board.Undo();
+        //     return value;
+        // }
+        // board.Undo();
+        if (Defender != null)
+            return Defender.GetValue() - Attacker.GetValue();
+        return 0;
+    }
 }
