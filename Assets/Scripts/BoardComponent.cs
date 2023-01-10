@@ -66,10 +66,7 @@ public class BoardComponent : MonoBehaviour{
     //Used for the timer
     private float _time;
 
-    private int[,] _hashes = new int[64,12];
-    private int[] _hashTeamToPlay = new int[2];
-
-    
+    private int _hashCutoffs;
 
     private void Start(){
         _pieces = new GameObject[8,8];
@@ -119,10 +116,10 @@ public class BoardComponent : MonoBehaviour{
         _time += Time.deltaTime;
         if (_time < _timeBetweenMoves) return;
         _time = 0;
-        
-        
+
+        _hashCutoffs = 0;
         MinMaxAlphaBetaSetUp();
-        Debug.Log(_board.Hash);
+        Debug.Log("Transposition cutoffs: " + _hashCutoffs);
         CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
         
         UpdatePieces();
@@ -245,11 +242,20 @@ public class BoardComponent : MonoBehaviour{
         node.DoMove();
 
         if (depth == 0 || node.IsTerminal){
-            return node.CalculateValue();
+            var nodeValue = node.CalculateValue();
+            TranspositionTable.Add(_board.Hash, nodeValue, depth);
+            return nodeValue;
         }
 
+        if (TranspositionTable.Cutoff(_board.Hash, depth)){
+            _hashCutoffs++;
+            var hashValue = TranspositionTable.Table[_board.Hash][0];
+            node.UndoMove();
+            return hashValue;
+        }
+        
         node.GenerateChildren();
-
+        
         int value;
         if (maximizing){
             value = int.MinValue;
@@ -270,6 +276,10 @@ public class BoardComponent : MonoBehaviour{
             }
         }
 
+        if (!TranspositionTable.Add(_board.Hash, value, depth)){
+            return TranspositionTable.Table[_board.Hash][0];
+        }
+        
         node.UndoMove();
         return value;
     }
