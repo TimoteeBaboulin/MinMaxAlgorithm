@@ -4,25 +4,49 @@ using System.Timers;
 using UnityEngine;
 
 public class Knight : Piece{
-    public Knight(int team, Vector2Int coord) : base(team, coord){ }
+    //Top Right Bottom Left
+    //TR BR BL TL
+    private static readonly int[] Directions = {
+        -8, +1, +8, -1, 
+        -7, 9, 7, -9
+    };
+    
+    public Knight(int team, int coord) : base(team, coord){ }
 
     public override List<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
-        Piece piece;
-        Vector2Int actualCoordinates;
-        
-        for (int x = -2; x <= 2; x++){
-            for (int y = -2; y <= 2; y++){
-                if (Math.Abs(x) + Math.Abs(y) != 3 || IsOutOfBounds(currentBoard, actualCoordinates = Coordinates + new Vector2Int(x,y)) || (piece = GetPieceAt(currentBoard, actualCoordinates)) != null && piece.Team == Team) continue;
+        int[] numSquaresToEdge = Board.NumSquaresToEdge[Coordinates];
+        if (numSquaresToEdge[0] >= 2){
+            //2 haut 1 droit
+            if (numSquaresToEdge[1] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates - 15, this, board.CurrentBoard[Coordinates - 15]));
+            if (numSquaresToEdge[3] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates - 17, this, board.CurrentBoard[Coordinates - 17]));
+        }
 
-                Piece goal = GetPieceAt(currentBoard, actualCoordinates);
-                if (goal != null && goal.Team == Team) continue;
-                moves.Add(new Move(Coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates)));
-            }
+        if (numSquaresToEdge[1] >= 2){
+            if (numSquaresToEdge[0] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates - 6, this, board.CurrentBoard[Coordinates - 6]));
+            if (numSquaresToEdge[2] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates + 10, this, board.CurrentBoard[Coordinates + 10]));
+        }
+        
+        if (numSquaresToEdge[2] >= 2){
+            if (numSquaresToEdge[1] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates + 17, this, board.CurrentBoard[Coordinates + 17]));
+            if (numSquaresToEdge[3] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates + 15, this, board.CurrentBoard[Coordinates + 15]));
+        }
+        
+        if (numSquaresToEdge[3] >= 2){
+            if (numSquaresToEdge[0] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates - 10, this, board.CurrentBoard[Coordinates - 10]));
+            if (numSquaresToEdge[2] >= 1)
+                moves.Add(new Move(Coordinates, Coordinates + 6, this, board.CurrentBoard[Coordinates + 6]));
         }
 
         return moves;

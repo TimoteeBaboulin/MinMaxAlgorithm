@@ -5,9 +5,9 @@ using UnityEngine;
 public abstract class Piece{
     public readonly Team Team;
     public bool HasMoved;
-    public Vector2Int Coordinates;
+    public int Coordinates;
 
-    protected Piece(int team, Vector2Int coord){
+    protected Piece(int team, int coord){
         Team = (Team)team;
         Coordinates = coord;
     }
@@ -21,10 +21,10 @@ public abstract class Piece{
         return this.GetType();
     }
     
-    protected bool IsOutOfBounds(Piece[,] board, Vector2Int coord){
-        return coord.x >= board.GetLength(0) || coord.y >= board.GetLength(1) || coord.x < 0 || coord.y < 0;
+    protected bool IsOutOfBounds(Piece[] board, int coord){
+        return coord >= 0 && coord < 64;
     }
-    protected Piece GetPieceAt(Piece[,] board, Vector2Int coord){
-        return board[coord.x, coord.y];
+    protected Piece GetPieceAt(Piece[] board, int coord){
+        return board[coord];
     }
 }

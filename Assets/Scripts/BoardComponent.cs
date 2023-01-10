@@ -75,37 +75,42 @@ public class BoardComponent : MonoBehaviour{
         //Set up arrays
         _possibleMoves = new List<GameObject>();
 
-        Piece[,] currentBoard = new Piece[8, 8];
+        Piece[] currentBoard = new Piece[64];
         //Instantiate the pieces
-        for (int x = 0; x < currentBoard.GetLength(0); x++){
-            for (int y = 0; y < currentBoard.GetLength(1); y++){
-                if (_baseBoard[x,y] == 0) currentBoard[x,y] = null;
+        for (int x = 0; x < 8; x++){
+            for (int y = 0; y < 8; y++){
+                int coord = x * 8 + y;
+                
+                if (_baseBoard[x,y] == 0) currentBoard[coord] = null;
 
                 int team = 0;
                 if (_baseBoard[x, y] < 0) team = 1;
 
+                
+                
                 switch (Math.Abs(_baseBoard[x,y])){
                     case 1:
-                        currentBoard[x, y] = new Pawn(team, new Vector2Int(x,y));
+                        currentBoard[coord] = new Pawn(team, coord);
                         break;
                     case 2:
-                        currentBoard[x, y] = new Knight(team, new Vector2Int(x,y));
+                        currentBoard[coord] = new Knight(team, coord);
                         break;
                     case 3:
-                        currentBoard[x, y] = new Bishop(team, new Vector2Int(x,y));
+                        currentBoard[coord] = new Bishop(team, coord);
                         break;
                     case 4:
-                        currentBoard[x, y] = new Rook(team, new Vector2Int(x,y));
+                        currentBoard[coord] = new Rook(team, coord);
                         break;
                     case 5:
-                        currentBoard[x, y] = new Queen(team, new Vector2Int(x,y));
+                        currentBoard[coord] = new Queen(team, coord);
                         break;
                     case 6:
-                        currentBoard[x, y] = new King(team, new Vector2Int(x,y));
+                        currentBoard[x, y] = new King(team, coord);
                         break;
                 }
             }
         }
+        Board.PrecomputedMoveData();
 
         _board = new Board(currentBoard, (int)CurrentPlayer);
         //Draw the background tiles
@@ -278,7 +283,7 @@ public class BoardComponent : MonoBehaviour{
 
         if (!TranspositionTable.Add(_board.Hash, value, depth)){
             return TranspositionTable.Table[_board.Hash][0];
-        }
+        }    
         
         node.UndoMove();
         return value;

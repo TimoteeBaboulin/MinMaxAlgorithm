@@ -2,23 +2,26 @@
 using UnityEngine;
 
 public class King : Piece{
-    private static readonly Vector2Int[] Directions = {
-        Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left, 
-        new(1, 1), new(1, -1), new(-1, -1), new(-1, 1)
+    //Top Right Bottom Left
+    //TR BR BL TL
+    private static readonly int[] Directions = {
+        -8, +1, +8, -1, 
+        -7, 9, 7, -9
     };
     
-    public King(int team, Vector2Int coord) : base(team, coord){ }
+    public King(int team, int coord) : base(team, coord){ }
 
     public override List<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
-        foreach (var direction in Directions){
-            var actualCoordinates = Coordinates + direction;
-            if (!IsOutOfBounds(currentBoard, actualCoordinates) && (GetPieceAt(currentBoard, actualCoordinates) == null || GetPieceAt(currentBoard, actualCoordinates).Team != Team))
-                moves.Add(new Move(Coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates)));
+        for (int x = 0; x < 8; x++){
+            if (Board.NumSquaresToEdge[Coordinates][x] >= 1 && board.IsEnemy(Coordinates + Directions[x], Team)){
+                moves.Add(new Move(Coordinates, Coordinates + Directions[x], this,
+                    board.CurrentBoard[Coordinates + Directions[x]]));
+            }
         }
 
         return moves;

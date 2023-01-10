@@ -2,34 +2,31 @@
 using UnityEngine;
 
 public class Bishop : Piece{
-    public Bishop(int team, Vector2Int coord) : base(team, coord){ }
+    //Top Right Bottom Left
+    //TR BR BL TL
+    private static readonly int[] Directions = {
+        -7, 9, 7, -9
+    };
+    
+    public Bishop(int team, int coord) : base(team, coord){ }
     
     public override List<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates] != this) return new List<Move>();
         
         List<Move> moves = new List<Move>();
 
-        for (int horizontal = -1; horizontal <= 1; horizontal+=2){
-            for (int vertical = -1; vertical <= 1; vertical+=2){
-                var actualCoordinates = Coordinates;
-                actualCoordinates.x += vertical;
-                actualCoordinates.y += horizontal;
-                
-                while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
-                    Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
-                    if (pieceBlocking == null){
-                        moves.Add(new Move(Coordinates, actualCoordinates, this, null));
-                        actualCoordinates.x += vertical;
-                        actualCoordinates.y += horizontal;
-                        continue;
-                    }
-                
-                    if (pieceBlocking.Team != Team) 
-                        moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
-                
+        for (int direction = 0; direction < 4; direction++){
+            var actualCoordinates = Coordinates;
+            for (int range = 0; range < Board.NumSquaresToEdge[Coordinates][direction + 4]; range++){
+                actualCoordinates += Directions[direction];
+                if (board.IsFriendly(actualCoordinates, Team))
                     break;
-                }
+                
+                moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+                
+                if (board.CurrentBoard[actualCoordinates] != null)
+                    break;
             }
         }
 

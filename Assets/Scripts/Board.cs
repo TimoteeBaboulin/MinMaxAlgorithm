@@ -5,10 +5,12 @@ using UnityEngine;
 using Random = System.Random;
 
 public class Board{
-    
+
+    public static readonly int[][] NumSquaresToEdge = new int[64][];
+
     //Etat du plateau
-    private readonly Piece[,] _board;
-    public Piece[,] CurrentBoard => _board;
+    private readonly Piece[] _board;
+    public Piece[] CurrentBoard => _board;
     private Team _player;
     public Team CurrentPlayer => _player;
 
@@ -29,12 +31,36 @@ public class Board{
     private readonly Stack<Move> _moves;
     
     //Utile pour le check
-    private static readonly Vector2Int[] Directions = {
-        Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left, 
-        new(1, 1), new(1, -1), new(-1, -1), new(-1, 1)
+    //Top Right Bottom Left
+    //TR BR BL TL
+    private static readonly int[] Directions = {
+        -8, +1, +8, -1, 
+        -7, 9, 7, -9
     };
+
+    public static void PrecomputedMoveData(){
+        for (int x = 0; x < 8; x++){
+            for (int y = 0; y < 8; y++){
+                int numNorth = x;
+                int numSouth = 7 - x;
+                int numWest = y;
+                int numEast = 7 - y;
+
+                NumSquaresToEdge[x * 8 + y] = new[]{
+                    numNorth,
+                    numEast,
+                    numSouth,
+                    numWest,
+                    Math.Min(numNorth, numEast),
+                    Math.Min(numSouth, numEast),
+                    Math.Min(numSouth, numWest),
+                    Math.Min(numNorth, numWest)
+                };
+            }
+        }
+    }
     
-    public Board(Piece[,] baseBoard, int currentPlayer){
+    public Board(Piece[] baseBoard, int currentPlayer){
         _board = baseBoard;
         _player = (Team)currentPlayer;
         _moves = new Stack<Move>();
@@ -98,37 +124,70 @@ public class Board{
     }
     public bool IsInCheck(){
         Piece king = _kings[(int)_player];
-        Vector2Int actualCoordinates;
-        foreach (var direction in Directions){
-            var range = 1;
-            actualCoordinates = king.Coordinates + direction * range;
-            
-            while (IsInBounds(actualCoordinates) && _board[actualCoordinates.x, actualCoordinates.y] == null){
-                range++;
-                actualCoordinates.x += direction.x;
-                actualCoordinates.y += direction.y;
-            }
-            
-            if (!IsInBounds(actualCoordinates)) continue;
-            var piece = _board[actualCoordinates.x, actualCoordinates.y];
-            if (piece.Team == _player) continue;
-            
-            if (direction.x != 0 && direction.y != 0){
-                if (range == 1 && piece.GetType() == typeof(Pawn)) return true;
-                if (piece.GetType() == typeof(Bishop) || piece.GetType() == typeof(Queen)) return true;
-            }
-            else{
-                if (piece.GetType() == typeof(Rook) || piece.GetType() == typeof(Queen)) return true;
+        
+        for (int direction = 0; direction < 8; direction++){
+            var actualCoordinates = king.Coordinates;
+            for (int range = 0; range < Board.NumSquaresToEdge[king.Coordinates][direction]; range++){
+                actualCoordinates += Directions[direction];
+                if (IsFriendly(actualCoordinates, king.Team))
+                    break;
+
+                if (_board[actualCoordinates] == null) continue;
+
+                var piece = _board[actualCoordinates];
+                if (piece.GetTypeOfPiece() == typeof(Queen))
+                    return true;
+                
+                switch (direction){
+                    case < 4:
+                        if (piece.GetTypeOfPiece() == typeof(Rook))
+                            return true;
+                        break;
+                    default:
+                        if (piece.GetTypeOfPiece() == typeof(Bishop))
+                            return true;
+                        break;
+                }
             }
         }
         
-        for (int x = -2; x <= 2; x++){
-            for (int y = -2; y <= 2; y++){
-                if (Math.Abs(x) + Math.Abs(y) != 3 || !IsInBounds(actualCoordinates = king.Coordinates + new Vector2Int(x,y))) continue;
+        int[] numSquaresToEdge = Board.NumSquaresToEdge[king.Coordinates];
+        var Coordinates = king.Coordinates;
+        if (numSquaresToEdge[0] >= 2){
+            //2 haut 1 droit
+            if (numSquaresToEdge[1] >= 1)
+                if (IsEnemy(Coordinates - 15, king.Team) && _board[Coordinates - 15].GetTypeOfPiece() == typeof(Knight))
+                    return true;
+            if (numSquaresToEdge[3] >= 1)
+                if (IsEnemy(Coordinates - 17, king.Team) && _board[Coordinates - 17].GetTypeOfPiece() == typeof(Knight))
+                    return true;
+        }
 
-                var piece = _board[actualCoordinates.x, actualCoordinates.y];
-                if (piece != null && piece.Team != _player && piece.GetType() == typeof(Knight)) return true;
-            }
+        if (numSquaresToEdge[1] >= 2){
+            if (numSquaresToEdge[0] >= 1)
+                if (IsEnemy(Coordinates - 6, king.Team) && _board[Coordinates - 6].GetTypeOfPiece() == typeof(Knight))
+                    return true;
+            if (numSquaresToEdge[2] >= 1)
+                if (IsEnemy(Coordinates +10, king.Team) && _board[Coordinates + 10].GetTypeOfPiece() == typeof(Knight))
+                    return true;
+        }
+        
+        if (numSquaresToEdge[2] >= 2){
+            if (numSquaresToEdge[1] >= 1)
+                if (IsEnemy(Coordinates + 17, king.Team) && _board[Coordinates + 17].GetTypeOfPiece() == typeof(Knight))
+                    return true;
+            if (numSquaresToEdge[3] >= 1)
+                if (IsEnemy(Coordinates + 15, king.Team) && _board[Coordinates + 15].GetTypeOfPiece() == typeof(Knight))
+                    return true;
+        }
+        
+        if (numSquaresToEdge[3] >= 2){
+            if (numSquaresToEdge[0] >= 1)
+                if (IsEnemy(Coordinates - 10, king.Team) && _board[Coordinates - 10].GetTypeOfPiece() == typeof(Knight))
+                    return true;
+            if (numSquaresToEdge[2] >= 1)
+                if (IsEnemy(Coordinates + 6, king.Team) && _board[Coordinates + 6].GetTypeOfPiece() == typeof(Knight))
+                    return true;
         }
 
         return false;
@@ -144,17 +203,21 @@ public class Board{
 
     //Joues un coups, ou revient un coups en arriere
     public void Do(Move move){
+
+        _currentHash ^= _playerturnHashes[(int) CurrentPlayer];
         
         move.Do(_board);
         _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
+        _currentHash ^= _playerturnHashes[(int) CurrentPlayer];
+        
         _moves.Push(move);
 
-        _currentHash ^= _pieceHashes[move.StartingPosition.x * 8 + move.StartingPosition.y, move.Attacker.GetID()];
-        _currentHash ^= _pieceHashes[move.EndingPosition.x * 8 + move.EndingPosition.y, move.Attacker.GetID()];
+        _currentHash ^= _pieceHashes[move.StartingPosition, move.Attacker.GetID()];
+        _currentHash ^= _pieceHashes[move.EndingPosition, move.Attacker.GetID()];
         
         if (move.Defender == null) return;
 
-        _currentHash ^= _pieceHashes[move.EndingPosition.x * 8 + move.EndingPosition.y, move.Defender.GetID()];
+        _currentHash ^= _pieceHashes[move.EndingPosition, move.Defender.GetID()];
         
         var defender = move.Defender;
         _teamPieces[(int)defender.Team].Remove(defender);
@@ -165,15 +228,17 @@ public class Board{
     public void Undo(){
         if (!_moves.TryPop(out var move)) return;
         
+        _currentHash ^= _playerturnHashes[(int) CurrentPlayer];
         move.Undo(_board);
         _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
+        _currentHash ^= _playerturnHashes[(int) CurrentPlayer]; 
         
-        _currentHash ^= _pieceHashes[move.StartingPosition.x * 8 + move.StartingPosition.y, move.Attacker.GetID()];
-        _currentHash ^= _pieceHashes[move.EndingPosition.x * 8 + move.EndingPosition.y, move.Attacker.GetID()];
+        _currentHash ^= _pieceHashes[move.StartingPosition, move.Attacker.GetID()];
+        _currentHash ^= _pieceHashes[move.EndingPosition, move.Attacker.GetID()];
         
         if (move.Defender == null) return;
         
-        _currentHash ^= _pieceHashes[move.EndingPosition.x * 8 + move.EndingPosition.y, move.Defender.GetID()];
+        _currentHash ^= _pieceHashes[move.EndingPosition, move.Defender.GetID()];
         
         var defender = move.Defender;
         _teamPieces[(int)defender.Team].Add(defender);
@@ -214,12 +279,10 @@ public class Board{
     }
     private int InitHashCode(){
         int hashCode = 0;
-        for (int x = 0; x < 8; x++){
-            for (int y = 0; y < 8; y++){
-                if (_board[x,y] == null) continue;
-                var piece = _board[x, y];
-                hashCode ^= _pieceHashes[x * 8 + y, piece.GetID()];
-            }
+        for (int x = 0; x < 64; x++){
+            if (_board[x] == null) continue;
+            var piece = _board[x];
+            hashCode ^= _pieceHashes[x, piece.GetID()];
         }
 
         hashCode ^= _playerturnHashes[(int)CurrentPlayer];
@@ -232,20 +295,27 @@ public class Board{
                actualCoordinates.y < 8;
     }
 
+    public bool IsFriendly(int coordinates, Team team){
+        return _board[coordinates] != null && _board[coordinates].Team == team;
+    }
+    public bool IsEnemy(int coordinates, Team team){
+        return _board[coordinates] != null && _board[coordinates].Team != team;
+    }
+
     //Getter
     public List<Piece> GetPieceFromTeam(Team team){
         return _teamPieces[(int)team];
     }
 
-    //Methode de debug, ne pas utiliser
-    public Vector2Int GetCoordinates(Piece piece){
-        for (int x = 0; x < 8; x++){
-            for (int y = 0; y < 8; y++){
-                if (_board[x, y] == piece)
-                    return new Vector2Int(x, y);
-            }
-        }
-
-        return new Vector2Int(0, 0);
-    }
+    // //Methode de debug, ne pas utiliser
+    // public Vector2Int GetCoordinates(Piece piece){
+    //     for (int x = 0; x < 8; x++){
+    //         for (int y = 0; y < 8; y++){
+    //             if (_board[x, y] == piece)
+    //                 return new Vector2Int(x, y);
+    //         }
+    //     }
+    //
+    //     return new Vector2Int(0, 0);
+    // }
 }
