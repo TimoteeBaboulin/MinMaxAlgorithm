@@ -16,7 +16,9 @@ public abstract class Piece{
     public abstract Sprite GetSprite(BoardComponent boardComponent);
     public abstract int GetValue();
     public abstract int GetID();
-
+    public abstract void SetToBitBoard();
+    public abstract ref long GetBitBoardRef();
+    
     public Type GetTypeOfPiece(){
         return this.GetType();
     }

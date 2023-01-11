@@ -1,4 +1,5 @@
-﻿using UnityEditor.Experimental.GraphView;
+﻿using System;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Move{
@@ -23,6 +24,13 @@ public class Move{
         board[EndingPosition] = Attacker;
         Attacker.Coordinates = EndingPosition;
 
+        Attacker.GetBitBoardRef() &= ~((long)1 << StartingPosition);
+        Attacker.GetBitBoardRef() |= (long)1 << EndingPosition;
+
+        if (Defender != null){
+            Defender.GetBitBoardRef() &= ~((long)1 << EndingPosition);
+        }
+
         Attacker.HasMoved = true;
     }
 
@@ -32,5 +40,12 @@ public class Move{
 
         Attacker.HasMoved = _didAttackerMoveBefore;
         Attacker.Coordinates = StartingPosition;
+        
+        Attacker.GetBitBoardRef() &= ~((long)1 << EndingPosition);
+        Attacker.GetBitBoardRef() |= (long)1 << StartingPosition;
+
+        if (Defender != null){
+            Defender.GetBitBoardRef() |= (long)1 << EndingPosition;
+        }
     }
 }

@@ -22,39 +22,55 @@ public class Knight : Piece{
         int[] numSquaresToEdge = Board.NumSquaresToEdge[Coordinates];
         if (numSquaresToEdge[0] >= 2){
             //2 haut 1 droit
-            if (numSquaresToEdge[1] >= 1)
-                if (!board.IsFriendly(Coordinates - 15, Team))
-                    moves.Add(new Move(Coordinates, Coordinates - 15, this, board.CurrentBoard[Coordinates - 15]));
-            if (numSquaresToEdge[3] >= 1)
-                if (!board.IsFriendly(Coordinates - 17, Team))
-                    moves.Add(new Move(Coordinates, Coordinates - 17, this, board.CurrentBoard[Coordinates - 17]));
+            if (numSquaresToEdge[1] >= 1){
+                var actualCoordinates = Coordinates + 17;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
+            if (numSquaresToEdge[3] >= 1){
+                var actualCoordinates = Coordinates + 15;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
         }
 
         if (numSquaresToEdge[1] >= 2){
-            if (numSquaresToEdge[0] >= 1)
-                if (!board.IsFriendly(Coordinates - 6, Team))
-                    moves.Add(new Move(Coordinates, Coordinates - 6, this, board.CurrentBoard[Coordinates - 6]));
-            if (numSquaresToEdge[2] >= 1)
-                if (!board.IsFriendly(Coordinates + 10, Team))
-                    moves.Add(new Move(Coordinates, Coordinates + 10, this, board.CurrentBoard[Coordinates + 10]));
+            if (numSquaresToEdge[0] >= 1){
+                var actualCoordinates = Coordinates + 10;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
+            if (numSquaresToEdge[2] >= 1){
+                var actualCoordinates = Coordinates - 6;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
         }
         
         if (numSquaresToEdge[2] >= 2){
-            if (numSquaresToEdge[1] >= 1)
-                if (!board.IsFriendly(Coordinates + 17, Team))
-                    moves.Add(new Move(Coordinates, Coordinates + 17, this, board.CurrentBoard[Coordinates + 17]));
-            if (numSquaresToEdge[3] >= 1)
-                if (!board.IsFriendly(Coordinates + 15, Team))
-                    moves.Add(new Move(Coordinates, Coordinates + 15, this, board.CurrentBoard[Coordinates + 15]));
+            if (numSquaresToEdge[1] >= 1){
+                var actualCoordinates = Coordinates - 15;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
+            if (numSquaresToEdge[3] >= 1){
+                var actualCoordinates = Coordinates - 17;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
         }
         
         if (numSquaresToEdge[3] >= 2){
-            if (numSquaresToEdge[0] >= 1)
-                if (!board.IsFriendly(Coordinates - 10, Team))
-                    moves.Add(new Move(Coordinates, Coordinates - 10, this, board.CurrentBoard[Coordinates - 10]));
-            if (numSquaresToEdge[2] >= 1)
-                if (!board.IsFriendly(Coordinates + 6, Team))
-                    moves.Add(new Move(Coordinates, Coordinates + 6, this, board.CurrentBoard[Coordinates + 6]));
+            if (numSquaresToEdge[0] >= 1){
+                var actualCoordinates = Coordinates + 6;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
+            if (numSquaresToEdge[2] >= 1){
+                var actualCoordinates = Coordinates - 10;
+                if (!board.IsFriendly(actualCoordinates, Team))
+                    moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
+            }
         }
 
         return moves;
@@ -70,5 +86,30 @@ public class Knight : Piece{
     
     public override int GetID(){
         return Team == Team.White ? 1 : 7;
+    }
+
+    public override void SetToBitBoard(){
+        var bit = (long)1 << Coordinates;
+        switch (Team){
+            case Team.Black:
+                BitBoards.BlackKnightOccupiedSquares |= bit;
+                break;
+            case Team.White:
+                BitBoards.WhiteKnightOccupiedSquares |= bit;
+                break;
+        }
+    }
+    
+    public override ref long GetBitBoardRef(){
+        switch (Team){
+            case Team.Black:
+                return ref BitBoards.BlackKnightOccupiedSquares;
+                break;
+            case Team.White:
+                return ref BitBoards.WhiteKnightOccupiedSquares;
+                break;
+        }
+
+        throw new NullReferenceException();
     }
 }

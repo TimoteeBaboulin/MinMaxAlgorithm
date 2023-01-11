@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Queen : Piece{
     //Top Right Bottom Left
     //TR BR BL TL
     private static readonly int[] Directions = {
-        -8, +1, +8, -1, 
-        -7, 9, 7, -9
+        8, +1, -8, -1, 
+        +9, -7, -9, +7
     };
     
     public Queen(int team, int coord) : base(team, coord){ }
@@ -44,5 +45,30 @@ public class Queen : Piece{
     
     public override int GetID(){
         return Team == Team.White ? 4 : 10;
+    }
+    
+    public override void SetToBitBoard(){
+        var bit = (long)1 << Coordinates;
+        switch (Team){
+            case Team.Black:
+                BitBoards.BlackQueenOccupiedSquares |= bit;
+                break;
+            case Team.White:
+                BitBoards.WhiteQueenOccupiedSquares |= bit;
+                break;
+        }
+    }
+    
+    public override ref long GetBitBoardRef(){
+        switch (Team){
+            case Team.Black:
+                return ref BitBoards.BlackQueenOccupiedSquares;
+                break;
+            case Team.White:
+                return ref BitBoards.WhiteQueenOccupiedSquares;
+                break;
+        }
+
+        throw new NullReferenceException();
     }
 }

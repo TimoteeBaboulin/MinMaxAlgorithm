@@ -403,6 +403,7 @@ MonoBehaviour:
   _startingPosition: 0
   _gameMode: 0
   _humanPlayer: 0
+  _occupancyType: 2
 --- !u!4 &1764422389
 Transform:
   m_ObjectHideFlags: 0

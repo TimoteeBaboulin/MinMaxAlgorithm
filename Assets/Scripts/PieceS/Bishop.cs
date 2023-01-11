@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Bishop : Piece{
     //Top Right Bottom Left
     //TR BR BL TL
     private static readonly int[] Directions = {
-        -7, 9, 7, -9
+        +9, -7, -9, +7
     };
     
     public Bishop(int team, int coord) : base(team, coord){ }
@@ -46,5 +47,30 @@ public class Bishop : Piece{
 
     public override int GetID(){
         return Team == Team.White ? 2 : 8;
+    }
+    
+    public override void SetToBitBoard(){
+        var bit = (long)1 << Coordinates;
+        switch (Team){
+            case Team.Black:
+                BitBoards.BlackBishopOccupiedSquares |= bit;
+                break;
+            case Team.White:
+                BitBoards.WhiteBishopOccupiedSquares |= bit;
+                break;
+        }
+    }
+    
+    public override ref long GetBitBoardRef(){
+        switch (Team){
+            case Team.Black:
+                return ref BitBoards.BlackBishopOccupiedSquares;
+                break;
+            case Team.White:
+                return ref BitBoards.WhiteBishopOccupiedSquares;
+                break;
+        }
+
+        throw new NullReferenceException();
     }
 }

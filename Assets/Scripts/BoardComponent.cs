@@ -28,10 +28,14 @@ public class BoardComponent : MonoBehaviour{
         AIvsAI,
         PlayerVsAI
     }
+    private enum OccupancyType{
+        Occupied,
+        Empty,
+        None
+    }
     
     private Piece[] CurrentBoard=> _board.CurrentBoard;
     
-    [NonSerialized] public List<Piece> PiecesEaten;
     [Header("Sprites")] 
     public PieceSprites Sprites;
     [SerializeField] private GameObject _pieceParent;
@@ -48,16 +52,18 @@ public class BoardComponent : MonoBehaviour{
     [SerializeField] private StartingPosition _startingPosition;
     [SerializeField] private GameMode _gameMode;
     [SerializeField] private Team _humanPlayer;
+
+    [Header("BitBoard Debug")] 
+    [SerializeField] private OccupancyType _occupancyType;
     
     //Actual board
     private Board _board;
-    
-    //Base board
     private int[,] _baseBoard;
     
     //Lists for rendering
     private GameObject[,] _tiles;
     private List<GameObject> _possibleMoves;
+    private List<GameObject> _occupancyTiles = new();
     private GameObject[,] _pieces;
 
     //Used to update the piece positions without efficiency issues
@@ -149,6 +155,7 @@ public class BoardComponent : MonoBehaviour{
         
         UpdatePieces();
         DrawPossibleMoves();
+        DrawOccupancy();
     }
 
     private void InstantiatePieces(){
@@ -215,7 +222,6 @@ public class BoardComponent : MonoBehaviour{
         
         if (_selected == null || _selected.Team != CurrentPlayer) return;
         
-        // List<Move> possibleMoves = _board.GetLegalMoves();
         List<Move> possibleMoves = _selected.PossibleMoves(_board);
 
         Color color = Color.blue;
@@ -235,20 +241,32 @@ public class BoardComponent : MonoBehaviour{
                 _possibleMoves.Add(newTile);
             }
         }
-        // foreach (var possibleMove in possibleMoves){
-        //     
-        //     var start = possibleMove.StartingPosition;
-        //     var end = possibleMove.EndingPosition;
-        //
-        //     int endY = end % 8;
-        //     int endX = (end - endY) / 8;
-        //     
-        //     var newTile = Instantiate(_tileBase, new Vector3(endY , endX, -1),
-        //         Quaternion.identity);
-        //     
-        //     newTile.GetComponent<MeshRenderer>().material.color = color;
-        //     _possibleMoves.Add(newTile);
-        // }
+    }
+
+    private void DrawOccupancy(){
+        foreach (var move in _occupancyTiles){
+            Destroy(move);
+        }
+        
+        if (_occupancyType == OccupancyType.None) return;
+        
+        Color red = Color.red;
+        red.a = 0.5f;
+        
+        long bitBoard = _occupancyType == OccupancyType.Occupied ? BitBoards.OccupiedSquares : BitBoards.EmptySquares;
+
+        for (int x = 0; x < 64; x++){
+            if ((bitBoard & ((long) 1 << x)) != 0){
+                int endY = x % 8;
+                int endX = (x - endY) / 8;
+                
+                var newTile = Instantiate(_tileBase, new Vector3(endY , endX, -1),
+                    Quaternion.identity);
+            
+                newTile.GetComponent<MeshRenderer>().material.color = red;
+                _occupancyTiles.Add(newTile);
+            }
+        }
     }
 
     private void MinMaxAlphaBetaSetUp(){

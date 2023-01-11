@@ -6,7 +6,7 @@ public class Pawn : Piece{
     //Top Right Bottom Left
     //TR BR BL TL
     private static readonly int[] Directions = {
-        -7, 9, 7, -9
+        +9, -7, -9, +7
     };
     
     public Pawn(int team, int coord) : base(team, coord){ }
@@ -21,30 +21,34 @@ public class Pawn : Piece{
         int actualCoordinates = Coordinates;
         actualCoordinates += forward;
         if (IsOutOfBounds(currentBoard, actualCoordinates)) return new List<Move>();
-        if (currentBoard[actualCoordinates] == null){
+        if (!BitBoards.GetBit(BitBoards.OccupiedSquares, actualCoordinates)){
             moves.Add(new Move(Coordinates, actualCoordinates, this, null));
 
             actualCoordinates += forward;
-            if (!HasMoved && !IsOutOfBounds(currentBoard, actualCoordinates) && currentBoard[actualCoordinates] == null) 
+            if (!HasMoved && !IsOutOfBounds(currentBoard, actualCoordinates) && !BitBoards.GetBit(BitBoards.OccupiedSquares, actualCoordinates)) 
                 moves.Add(new Move(Coordinates, actualCoordinates, this, null));
+        }
+        
+        if (currentBoard[actualCoordinates] == null){
+            
         }
 
         //Captures
         switch (Team){
             case Team.Black:
                 actualCoordinates = Coordinates - 9;
-                if (Board.NumSquaresToEdge[Coordinates][5] != 0 && board.IsEnemy(actualCoordinates, Team))
+                if (Board.NumSquaresToEdge[Coordinates][5] != 0 && BitBoards.GetBit(BitBoards.WhiteOccupiedSquares, actualCoordinates))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
                 actualCoordinates = Coordinates - 7;
-                if (Board.NumSquaresToEdge[Coordinates][6] != 0 && board.IsEnemy(actualCoordinates, Team))
+                if (Board.NumSquaresToEdge[Coordinates][6] != 0 && BitBoards.GetBit(BitBoards.WhiteOccupiedSquares, actualCoordinates))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
                 break;
             case Team.White:
                 actualCoordinates = Coordinates + 7;
-                if (Board.NumSquaresToEdge[Coordinates][4] != 0 && board.IsEnemy(actualCoordinates, Team))
+                if (Board.NumSquaresToEdge[Coordinates][4] != 0 && BitBoards.GetBit(BitBoards.BlackOccupiedSquares, actualCoordinates))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
                 actualCoordinates = Coordinates + 9;
-                if (Board.NumSquaresToEdge[Coordinates][7] != 0 && board.IsEnemy(actualCoordinates, Team))
+                if (Board.NumSquaresToEdge[Coordinates][7] != 0 && BitBoards.GetBit(BitBoards.BlackOccupiedSquares, actualCoordinates))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
                 break;
             default:
@@ -64,5 +68,30 @@ public class Pawn : Piece{
 
     public override int GetID(){
         return Team == Team.White ? 0 : 6;
+    }
+
+    public override void SetToBitBoard(){
+        var bit = (long)1 << Coordinates;
+        switch (Team){
+            case Team.Black:
+                BitBoards.BlackPawnsOccupiedSquares |= bit;
+                break;
+            case Team.White:
+                BitBoards.WhitePawnsOccupiedSquares |= bit;
+                break;
+        }
+    }
+
+    public override ref long GetBitBoardRef(){
+        switch (Team){
+            case Team.Black:
+                return ref BitBoards.BlackPawnsOccupiedSquares;
+                break;
+            case Team.White:
+                return ref BitBoards.WhitePawnsOccupiedSquares;
+                break;
+        }
+
+        throw new NullReferenceException();
     }
 }

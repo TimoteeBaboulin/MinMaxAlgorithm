@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Rook : Piece{
     //Top Right Bot Left
     private static readonly int[] Directions = {
-        -8, +1, +8, -1
+        8, +1, -8, -1
     };
 
     public Rook(int team, int coord) : base(team, coord){ }
@@ -32,9 +33,7 @@ public class Rook : Piece{
         return moves;
     }
     public override Sprite GetSprite(BoardComponent boardComponent){
-        if (Team == 0)
-            return boardComponent.Sprites.White.Rook;
-        return boardComponent.Sprites.Black.Rook;
+        return Team == 0 ? boardComponent.Sprites.White.Rook : boardComponent.Sprites.Black.Rook;
     }
     public override int GetValue(){
         return 525;
@@ -42,5 +41,30 @@ public class Rook : Piece{
     
     public override int GetID(){
         return Team == Team.White ? 3 : 9;
+    }
+    
+    public override void SetToBitBoard(){
+        var bit = (long)1 << Coordinates;
+        switch (Team){
+            case Team.Black:
+                BitBoards.BlackRookOccupiedSquares |= bit;
+                break;
+            case Team.White:
+                BitBoards.WhiteRookOccupiedSquares |= bit;
+                break;
+        }
+    }
+    
+    public override ref long GetBitBoardRef(){
+        switch (Team){
+            case Team.Black:
+                return ref BitBoards.BlackRookOccupiedSquares;
+                break;
+            case Team.White:
+                return ref BitBoards.WhiteRookOccupiedSquares;
+                break;
+        }
+
+        throw new NullReferenceException();
     }
 }

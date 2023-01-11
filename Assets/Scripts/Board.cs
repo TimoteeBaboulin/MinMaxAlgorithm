@@ -8,6 +8,7 @@ public class Board{
 
     public static readonly int[][] NumSquaresToEdge = new int[64][];
     public static readonly UInt64[] AttackToBitBoards = new UInt64[64];
+    public static readonly UInt64[] OccupancyBitBoards = new ulong[12];
 
     //Etat du plateau
     private readonly Piece[] _board;
@@ -35,15 +36,15 @@ public class Board{
     //Top Right Bottom Left
     //TR BR BL TL
     private static readonly int[] Directions = {
-        -8, +1, +8, -1, 
-        -7, 9, 7, -9
+        8, +1, -8, -1, 
+        +9, -7, -9, +7
     };
 
     public static void PrecomputedMoveData(){
         for (int x = 0; x < 8; x++){
             for (int y = 0; y < 8; y++){
-                int numNorth = x;
-                int numSouth = 7 - x;
+                int numNorth = 7 - x;
+                int numSouth = x;
                 int numWest = y;
                 int numEast = 7 - y;
 
@@ -57,6 +58,22 @@ public class Board{
                     Math.Min(numSouth, numWest),
                     Math.Min(numNorth, numWest)
                 };
+            }
+        }
+    }
+
+    private void GenerateBitBoards(){
+        for (int x = 0; x < 64; x++){
+            if (_board[x] == null) continue;
+            _board[x].SetToBitBoard();
+            
+            var moves = _board[x].PossibleMoves(this);
+            for (int y = 0; y < 64; y++){
+                foreach (var move in moves){
+                    if (move.EndingPosition == y){
+                        AttackToBitBoards[x] |= (UInt64)1 << y;
+                    }
+                }
             }
         }
     }
@@ -87,19 +104,9 @@ public class Board{
         }
         GenerateNumbers();
         _currentHash = InitHashCode();
+        GenerateBitBoards();
+        Debug.Log(Convert.ToString((long)BitBoards.WhiteOccupiedSquares, 2).PadLeft(64, '0'));
 
-        for (int x = 0; x < 64; x++){
-            if (_board[x] == null) continue;
-            var moves = _board[x].PossibleMoves(this);
-            for (int y = 0; y < 64; y++){
-                foreach (var move in moves){
-                    if (move.EndingPosition == y){
-                        AttackToBitBoards[x] |= (UInt64)1 << y;
-                    }
-                }
-            }
-        }
-        
         Debug.Log("BitMaps Donesy");
     }
 
@@ -343,16 +350,4 @@ public class Board{
     public List<Piece> GetPieceFromTeam(Team team){
         return _teamPieces[(int)team];
     }
-
-    // //Methode de debug, ne pas utiliser
-    // public Vector2Int GetCoordinates(Piece piece){
-    //     for (int x = 0; x < 8; x++){
-    //         for (int y = 0; y < 8; y++){
-    //             if (_board[x, y] == piece)
-    //                 return new Vector2Int(x, y);
-    //         }
-    //     }
-    //
-    //     return new Vector2Int(0, 0);
-    // }
 }
