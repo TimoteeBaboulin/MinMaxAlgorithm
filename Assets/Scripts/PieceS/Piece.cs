@@ -22,7 +22,7 @@ public abstract class Piece{
     }
     
     protected bool IsOutOfBounds(Piece[] board, int coord){
-        return coord >= 0 && coord < 64;
+        return coord < 0 || coord >= 64;
     }
     protected Piece GetPieceAt(Piece[] board, int coord){
         return board[coord];

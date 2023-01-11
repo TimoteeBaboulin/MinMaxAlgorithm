@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Random = System.Random;
@@ -28,7 +29,7 @@ public class BoardComponent : MonoBehaviour{
         PlayerVsAI
     }
     
-    private Piece[,] CurrentBoard=> _board.CurrentBoard;
+    private Piece[] CurrentBoard=> _board.CurrentBoard;
     
     [NonSerialized] public List<Piece> PiecesEaten;
     [Header("Sprites")] 
@@ -36,9 +37,8 @@ public class BoardComponent : MonoBehaviour{
     [SerializeField] private GameObject _pieceParent;
     [SerializeField] private GameObject _tileParent;
     [SerializeField] private GameObject _tileBase;
-
-    [Header("Current player, do not touch")]
-    [Range(0,1)]public Team CurrentPlayer;
+    
+    private Team CurrentPlayer => _board.CurrentPlayer;
 
     [Header("AI settings")]
     [SerializeField] private int _depth;
@@ -68,6 +68,8 @@ public class BoardComponent : MonoBehaviour{
 
     private int _hashCutoffs;
 
+    [SerializeField] private Piece _selected;
+    
     private void Start(){
         _pieces = new GameObject[8,8];
         //Get the starting position info
@@ -79,7 +81,7 @@ public class BoardComponent : MonoBehaviour{
         //Instantiate the pieces
         for (int x = 0; x < 8; x++){
             for (int y = 0; y < 8; y++){
-                int coord = x * 8 + y;
+                int coord = (7 - x) * 8 + 7 - y;
                 
                 if (_baseBoard[x,y] == 0) currentBoard[coord] = null;
 
@@ -105,44 +107,63 @@ public class BoardComponent : MonoBehaviour{
                         currentBoard[coord] = new Queen(team, coord);
                         break;
                     case 6:
-                        currentBoard[x, y] = new King(team, coord);
+                        currentBoard[coord] = new King(team, coord);
                         break;
                 }
             }
         }
         Board.PrecomputedMoveData();
 
-        _board = new Board(currentBoard, (int)CurrentPlayer);
+        _board = new Board(currentBoard, Team.White);
         //Draw the background tiles
         DrawBoard();
         InstantiatePieces();
     }
     private void Update(){
-        _time += Time.deltaTime;
-        if (_time < _timeBetweenMoves) return;
-        _time = 0;
+        // _time += Time.deltaTime;
+        // if (_time < _timeBetweenMoves) return;
+        // _time = 0;
+        //
+        // _hashCutoffs = 0;
+        // MinMaxAlphaBetaSetUp();
+        // Debug.Log("Transposition cutoffs: " + _hashCutoffs);
+        // CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
+        //
+        // UpdatePieces();
 
-        _hashCutoffs = 0;
-        MinMaxAlphaBetaSetUp();
-        Debug.Log("Transposition cutoffs: " + _hashCutoffs);
-        CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
+        if (Input.GetMouseButtonDown(0)){
+            var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            int mouseX = Mathf.RoundToInt(mousePosition.x);
+            int mouseY = Mathf.RoundToInt(mousePosition.y);
+
+            if (_selected != null && _selected.Team == CurrentPlayer){
+                foreach (var move in _selected.PossibleMoves(_board).Where(move => move.EndingPosition == mouseY * 8 + mouseX)){
+                    _board.Do(move);
+                    _lastMove = move;
+                    _selected = null;
+                    return;
+                }
+            }
+            _selected = CurrentBoard[mouseY * 8 + mouseX];
+        }
         
         UpdatePieces();
+        DrawPossibleMoves();
     }
 
     private void InstantiatePieces(){
-        float height = CurrentBoard.GetLength(0);
-        float length = CurrentBoard.GetLength(1);
+        float height = 8;
+        float length = 8;
 
         for (int x = 0; x < height; x++){
             for (int y = 0; y < length; y++){
-                if (CurrentBoard[x, y] != null){
-                    GameObject newPiece = new GameObject(CurrentBoard[x,y].GetSprite(this).name);
-                    newPiece.transform.position = new Vector3(length/2 - y -0.5f , height/2 - x -0.5f, 0);
+                if (CurrentBoard[x * 8 + y] != null){
+                    GameObject newPiece = new GameObject(CurrentBoard[x * 8 + y].GetSprite(this).name);
+                    newPiece.transform.position = new Vector3(y,x, 0);
                     if (_pieceParent != null) newPiece.transform.parent = _pieceParent.transform;
                     
                     var newRenderer = newPiece.AddComponent<SpriteRenderer>() as SpriteRenderer;
-                    newRenderer.sprite = CurrentBoard[x, y].GetSprite(this);
+                    newRenderer.sprite = CurrentBoard[x * 8 + y].GetSprite(this);
                     _pieces[x, y] = newPiece;
                 }
             }
@@ -155,25 +176,29 @@ public class BoardComponent : MonoBehaviour{
         var start = _lastMove.StartingPosition;
         var end = _lastMove.EndingPosition;
         
-        if (_lastMove.Defender != null){
-            _pieces[end.x, end.y].SetActive(false);
-        }
-        _pieces[start.x, start.y].transform.position =
-            new Vector3(4 - end.y - 0.5f, 4 - end.x - 0.5f, 0);
-        _pieces[end.x, end.y] = _pieces[start.x, start.y];
-        _pieces[start.x, start.y] = null;
+        int startY = start % 8;
+        int startX = (start - startY) / 8;
         
+        int endY = end % 8;
+        int endX = (end - endY) / 8;
+        if (_lastMove.Defender != null){
+            _pieces[endX, endY].SetActive(false);
+        }
+        _pieces[startX, startY].transform.position =
+            new Vector3(endY, endX, 0);
+        _pieces[endX, endY] = _pieces[startX, startY];
+        _pieces[startX, startY] = null;
+        _lastMove = null;
     }
     
     private void DrawBoard(){
-        int height = CurrentBoard.GetLength(0);
-        int length = CurrentBoard.GetLength(1);
-
+        int height = 8;
+        int length = 8;
         _tiles = new GameObject[height, length];
         
         for (int x = 0; x < height; x++){
             for (int y = 0; y < length; y++){
-                var newTile = Instantiate(_tileBase, new Vector3(length/2 - y -0.5f , height/2 - x -0.5f, 1),
+                var newTile = Instantiate(_tileBase, new Vector3(y, x, 1),
                     Quaternion.identity);
                 if (_tileParent != null) newTile.transform.parent = _tileParent.transform;
                 
@@ -188,20 +213,42 @@ public class BoardComponent : MonoBehaviour{
             Destroy(move);
         }
         
-        List<Move> possibleMoves = _board.GetLegalMoves();
+        if (_selected == null || _selected.Team != CurrentPlayer) return;
+        
+        // List<Move> possibleMoves = _board.GetLegalMoves();
+        List<Move> possibleMoves = _selected.PossibleMoves(_board);
 
         Color color = Color.blue;
         color.a = 0.5f;
+
+        if (Board.AttackToBitBoards[_selected.Coordinates] == 0) return;
         
-        int height = CurrentBoard.GetLength(0);
-        int length = CurrentBoard.GetLength(1);
-        foreach (var possibleMove in possibleMoves){
-            var newTile = Instantiate(_tileBase, new Vector3(length/2 - possibleMove.EndingPosition.y -0.5f , height/2 - possibleMove.EndingPosition.x -0.5f, -1),
-                Quaternion.identity);
+        for (int x = 0; x < 64; x++){
+            if ((Board.AttackToBitBoards[_selected.Coordinates] & ((ulong) 1 << x)) != 0){
+                int endY = x % 8;
+                int endX = (x - endY) / 8;
+                
+                var newTile = Instantiate(_tileBase, new Vector3(endY , endX, -1),
+                    Quaternion.identity);
             
-            newTile.GetComponent<MeshRenderer>().material.color = color;
-            _possibleMoves.Add(newTile);
+                newTile.GetComponent<MeshRenderer>().material.color = color;
+                _possibleMoves.Add(newTile);
+            }
         }
+        // foreach (var possibleMove in possibleMoves){
+        //     
+        //     var start = possibleMove.StartingPosition;
+        //     var end = possibleMove.EndingPosition;
+        //
+        //     int endY = end % 8;
+        //     int endX = (end - endY) / 8;
+        //     
+        //     var newTile = Instantiate(_tileBase, new Vector3(endY , endX, -1),
+        //         Quaternion.identity);
+        //     
+        //     newTile.GetComponent<MeshRenderer>().material.color = color;
+        //     _possibleMoves.Add(newTile);
+        // }
     }
 
     private void MinMaxAlphaBetaSetUp(){

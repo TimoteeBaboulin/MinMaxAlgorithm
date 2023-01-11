@@ -7,6 +7,7 @@ using Random = System.Random;
 public class Board{
 
     public static readonly int[][] NumSquaresToEdge = new int[64][];
+    public static readonly UInt64[] AttackToBitBoards = new UInt64[64];
 
     //Etat du plateau
     private readonly Piece[] _board;
@@ -60,9 +61,9 @@ public class Board{
         }
     }
     
-    public Board(Piece[] baseBoard, int currentPlayer){
+    public Board(Piece[] baseBoard, Team currentPlayer){
         _board = baseBoard;
-        _player = (Team)currentPlayer;
+        _player = currentPlayer;
         _moves = new Stack<Move>();
 
         _kings = new Piece[2];
@@ -86,6 +87,20 @@ public class Board{
         }
         GenerateNumbers();
         _currentHash = InitHashCode();
+
+        for (int x = 0; x < 64; x++){
+            if (_board[x] == null) continue;
+            var moves = _board[x].PossibleMoves(this);
+            for (int y = 0; y < 64; y++){
+                foreach (var move in moves){
+                    if (move.EndingPosition == y){
+                        AttackToBitBoards[x] |= (UInt64)1 << y;
+                    }
+                }
+            }
+        }
+        
+        Debug.Log("BitMaps Donesy");
     }
 
     //Methodes liees au calcul des moves
@@ -203,17 +218,19 @@ public class Board{
 
     //Joues un coups, ou revient un coups en arriere
     public void Do(Move move){
-
-        _currentHash ^= _playerturnHashes[(int) CurrentPlayer];
-        
         move.Do(_board);
         _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
+        
         _currentHash ^= _playerturnHashes[(int) CurrentPlayer];
+        _currentHash ^= _playerturnHashes[(int) (CurrentPlayer == Team.White ? Team.Black : Team.White)];
         
         _moves.Push(move);
 
         _currentHash ^= _pieceHashes[move.StartingPosition, move.Attacker.GetID()];
         _currentHash ^= _pieceHashes[move.EndingPosition, move.Attacker.GetID()];
+        
+        RecalculateBitBoard(move.StartingPosition);
+        RecalculateBitBoard(move.EndingPosition);
         
         if (move.Defender == null) return;
 
@@ -222,6 +239,8 @@ public class Board{
         var defender = move.Defender;
         _teamPieces[(int)defender.Team].Remove(defender);
 
+        
+        
         if (defender.GetTypeOfPiece() == typeof(Rook)) _rooks[(int)defender.Team].Remove(defender);
         else if (defender.GetTypeOfPiece() == typeof(Bishop)) _bishops[(int)defender.Team].Remove(defender);
     }
@@ -236,6 +255,9 @@ public class Board{
         _currentHash ^= _pieceHashes[move.StartingPosition, move.Attacker.GetID()];
         _currentHash ^= _pieceHashes[move.EndingPosition, move.Attacker.GetID()];
         
+        RecalculateBitBoard(move.StartingPosition);
+        RecalculateBitBoard(move.EndingPosition);
+        
         if (move.Defender == null) return;
         
         _currentHash ^= _pieceHashes[move.EndingPosition, move.Defender.GetID()];
@@ -243,6 +265,8 @@ public class Board{
         var defender = move.Defender;
         _teamPieces[(int)defender.Team].Add(defender);
             
+        
+        
         if (defender.GetTypeOfPiece() == typeof(Rook)) _rooks[(int)defender.Team].Add(defender);
         else if (defender.GetTypeOfPiece() == typeof(Bishop)) _bishops[(int)defender.Team].Add(defender);
     }
@@ -293,6 +317,19 @@ public class Board{
     private bool IsInBounds(Vector2Int actualCoordinates){
         return actualCoordinates.x > 0 && actualCoordinates.x < 8 && actualCoordinates.y > 0 &&
                actualCoordinates.y < 8;
+    }
+
+    private void RecalculateBitBoard(int coord){
+        AttackToBitBoards[coord] = 0;
+        if (_board[coord] == null) return;
+        var moves = _board[coord].PossibleMoves(this);
+        for (int y = 0; y < 64; y++){
+            foreach (var move in moves){
+                if (move.EndingPosition == y){
+                    AttackToBitBoards[coord] |= (UInt64)1 << y;
+                }
+            }
+        }
     }
 
     public bool IsFriendly(int coordinates, Team team){

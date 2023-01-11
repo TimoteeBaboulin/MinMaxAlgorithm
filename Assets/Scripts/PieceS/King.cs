@@ -18,7 +18,7 @@ public class King : Piece{
         List<Move> moves = new List<Move>();
 
         for (int x = 0; x < 8; x++){
-            if (Board.NumSquaresToEdge[Coordinates][x] >= 1 && board.IsEnemy(Coordinates + Directions[x], Team)){
+            if (Board.NumSquaresToEdge[Coordinates][x] >= 1 && !board.IsFriendly(Coordinates + Directions[x], Team)){
                 moves.Add(new Move(Coordinates, Coordinates + Directions[x], this,
                     board.CurrentBoard[Coordinates + Directions[x]]));
             }

@@ -17,10 +17,11 @@ public class Pawn : Piece{
         
         List<Move> moves = new List<Move>();
 
-        int forward = Team == Team.White ? -8 : 8;
+        int forward = Team == Team.White ? 8 : -8;
         int actualCoordinates = Coordinates;
         actualCoordinates += forward;
-        if (!IsOutOfBounds(currentBoard, actualCoordinates) && currentBoard[actualCoordinates] == null){
+        if (IsOutOfBounds(currentBoard, actualCoordinates)) return new List<Move>();
+        if (currentBoard[actualCoordinates] == null){
             moves.Add(new Move(Coordinates, actualCoordinates, this, null));
 
             actualCoordinates += forward;
@@ -31,18 +32,18 @@ public class Pawn : Piece{
         //Captures
         switch (Team){
             case Team.Black:
-                actualCoordinates = Coordinates + 9;
+                actualCoordinates = Coordinates - 9;
                 if (Board.NumSquaresToEdge[Coordinates][5] != 0 && board.IsEnemy(actualCoordinates, Team))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
-                actualCoordinates = Coordinates + 7;
+                actualCoordinates = Coordinates - 7;
                 if (Board.NumSquaresToEdge[Coordinates][6] != 0 && board.IsEnemy(actualCoordinates, Team))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
                 break;
             case Team.White:
-                actualCoordinates = Coordinates - 7;
+                actualCoordinates = Coordinates + 7;
                 if (Board.NumSquaresToEdge[Coordinates][4] != 0 && board.IsEnemy(actualCoordinates, Team))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
-                actualCoordinates = Coordinates - 9;
+                actualCoordinates = Coordinates + 9;
                 if (Board.NumSquaresToEdge[Coordinates][7] != 0 && board.IsEnemy(actualCoordinates, Team))
                     moves.Add(new Move(Coordinates, actualCoordinates, this, board.CurrentBoard[actualCoordinates]));
                 break;

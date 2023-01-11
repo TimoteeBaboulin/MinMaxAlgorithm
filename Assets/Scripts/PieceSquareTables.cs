@@ -93,8 +93,9 @@ public static class PieceSquareTables{
                 throw new NotImplementedException();
         }
 
-        var x = piece.Coordinates.x;
-        var y = piece.Coordinates.y;
+        var y = piece.Coordinates % 8;
+        var x = (piece.Coordinates - y) / 8;
+        
         return piece.Team == Team.White ? table[x, y] : table[7-x, y];
     }
 }
