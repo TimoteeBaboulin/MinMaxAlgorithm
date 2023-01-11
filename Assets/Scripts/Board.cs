@@ -63,40 +63,35 @@ public class Board{
     }
 
     //Methodes liees au calcul des moves
-    public List<Move> GetLegalMoves(){
+    public IEnumerable<Move> GetLegalMoves(){
         List<Move> moves = new List<Move>();
-        foreach (var piece in _teamPieces[(int) _player]){
-            moves.AddRange(piece.PossibleMoves(this));
+        foreach (var piece in _board){
+            if (piece == null || piece.Team != CurrentPlayer) continue;
+            foreach (var move in piece.PossibleMoves(this)){
+                Do(move);
+
+                bool check = IsInCheck(_player == Team.Black ? Team.White : Team.Black);
+                
+                Undo();
+                if (!check) yield return move;
+            }
         }
-
-        for (int x = moves.Count - 1; x >= 0; x--){
-            var currentMove = moves[x];
-            currentMove.Do(_board);
-
-            if (IsInCheck()) moves.Remove(moves[x]);
-            currentMove.Undo(_board);
-        }
-
-        moves.Sort((a, b) => a.GuessValue(this) - b.GuessValue(this));
         
-        return moves;
+        yield break;
     }
 
-    public List<Move> GetLegalMoves(Team team){
-        List<Move> moves = new List<Move>();
-        foreach (var piece in _teamPieces[(int) team]){
-            moves.AddRange(piece.PossibleMoves(this));
+    public IEnumerable<Move> GetLegalMoves(Team team){
+        foreach (var move in _teamPieces[(int) team].SelectMany(piece => piece.PossibleMoves(this))){
+            Do(move);
+            Debug.Log("In");
+            
+            if (!IsInCheck()){
+                yield return move;
+            }
+            
+            Debug.Log("Out");
+            Undo();
         }
-
-        for (int x = moves.Count - 1; x >= 0; x--){
-            var currentMove = moves[x];
-            currentMove.Do(_board);
-
-            if (IsInCheck()) moves.Remove(moves[x]);
-            currentMove.Undo(_board);
-        }
-
-        return moves;
     }
     public bool IsInCheck(){
         Piece king = _kings[(int)_player];
@@ -135,17 +130,51 @@ public class Board{
 
         return false;
     }
+    public bool IsInCheck(Team team){
+        Piece king = _kings[(int)team];
+        Vector2Int actualCoordinates;
+        foreach (var direction in Directions){
+            var range = 1;
+            actualCoordinates = king.Coordinates + direction * range;
+            
+            while (IsInBounds(actualCoordinates) && _board[actualCoordinates.x, actualCoordinates.y] == null){
+                range++;
+                actualCoordinates.x += direction.x;
+                actualCoordinates.y += direction.y;
+            }
+            
+            if (!IsInBounds(actualCoordinates)) continue;
+            var piece = _board[actualCoordinates.x, actualCoordinates.y];
+            if (piece.Team == team) continue;
+            
+            if (direction.x != 0 && direction.y != 0){
+                if (range == 1 && piece.GetType() == typeof(Pawn)) return true;
+                if (piece.GetType() == typeof(Bishop) || piece.GetType() == typeof(Queen)) return true;
+            }
+            else{
+                if (piece.GetType() == typeof(Rook) || piece.GetType() == typeof(Queen)) return true;
+            }
+        }
+        
+        for (int x = -2; x <= 2; x++){
+            for (int y = -2; y <= 2; y++){
+                if (Math.Abs(x) + Math.Abs(y) != 3 || !IsInBounds(actualCoordinates = king.Coordinates + new Vector2Int(x,y))) continue;
 
-    public bool CanMove(){
-        foreach (var piece in _teamPieces[(int) _player]){
-            if (piece.PossibleMoves(this).Count > 0) return true;
+                var piece = _board[actualCoordinates.x, actualCoordinates.y];
+                if (piece != null && piece.Team != team && piece.GetType() == typeof(Knight)) return true;
+            }
         }
 
         return false;
     }
 
+    public bool CanMove(){
+        return true;
+    }
+
     //Joues un coups, ou revient un coups en arriere
     public void Do(Move move){
+        // Debug.Log("Do");
         
         move.Do(_board);
         _player = CurrentPlayer == Team.Black? Team.White : Team.Black;
@@ -164,7 +193,9 @@ public class Board{
         if (defender.GetTypeOfPiece() == typeof(Rook)) _rooks[(int)defender.Team].Remove(defender);
         else if (defender.GetTypeOfPiece() == typeof(Bishop)) _bishops[(int)defender.Team].Remove(defender);
     }
+    
     public void Undo(){
+        // Debug.Log("Undo");
         if (!_moves.TryPop(out var move)) return;
         
         move.Undo(_board);
@@ -192,14 +223,14 @@ public class Board{
         return HaveBishopPair(team) && !HaveBishopPair(team == Team.Black ? Team.White : Team.Black);
     }
 
-    public int GetMobility(){
-        int count = 0;
-        foreach (var piece in _teamPieces[(int)_player]){
-            count += piece.PossibleMoves(this).Count;
-        }
-
-        return count;
-    }
+    // public int GetMobility(){
+    //     int count = 0;
+    //     foreach (var piece in _teamPieces[(int)_player]){
+    //         count += piece.PossibleMoves(this).Count;
+    //     }
+    //
+    //     return count;
+    // }
 
     //Transposition Tables
     private void GenerateNumbers(){

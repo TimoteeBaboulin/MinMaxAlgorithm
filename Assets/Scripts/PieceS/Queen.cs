@@ -9,30 +9,26 @@ public class Queen : Piece{
     
     public Queen(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board){
+    public override IEnumerable<Move> PossibleMoves(Board board){
         var currentBoard= board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
-        
-        List<Move> moves = new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) yield break;
 
         foreach (var direction in Directions){
             var range = 1;
             var actualCoordinates = Coordinates + direction * range;
             Piece pieceBlocking = null;
             while (!IsOutOfBounds(currentBoard, actualCoordinates) && (pieceBlocking = GetPieceAt(currentBoard, actualCoordinates)) == null){
-                moves.Add(new Move(Coordinates, actualCoordinates, this, null));
-        
+                yield return new Move(Coordinates, actualCoordinates, this, null);
+
                 range++;
                 actualCoordinates = Coordinates + direction * range;
             }
 
             
             if (!IsOutOfBounds(currentBoard, actualCoordinates) && pieceBlocking != null && pieceBlocking.Team != Team){
-                moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
+                yield return new Move(Coordinates, actualCoordinates, this, pieceBlocking);
             }
         }
-
-        return moves;
     }
     public override Sprite GetSprite(BoardComponent boardComponent){
         if (Team == 0)

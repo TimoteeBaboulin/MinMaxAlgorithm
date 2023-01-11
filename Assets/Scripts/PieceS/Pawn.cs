@@ -4,21 +4,19 @@ using UnityEngine;
 public class Pawn : Piece{
     public Pawn(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board){
+    public override IEnumerable<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
-        
-        List<Move> moves = new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) yield break;
 
         int forward = Team == 0 ? -1 : 1;
         Vector2Int actualCoordinates = Coordinates;
         actualCoordinates.x += forward;
         if (!IsOutOfBounds(currentBoard, actualCoordinates) && currentBoard[actualCoordinates.x, actualCoordinates.y] == null){
-            moves.Add(new Move(Coordinates, actualCoordinates, this, null));
+            yield return new Move(Coordinates, actualCoordinates, this, null);
 
             actualCoordinates.x += forward;
-            if (!HasMoved && !IsOutOfBounds(currentBoard, actualCoordinates) && currentBoard[actualCoordinates.x, actualCoordinates.y] == null) 
-                moves.Add(new Move(Coordinates, actualCoordinates, this, null));
+            if (!HasMoved && !IsOutOfBounds(currentBoard, actualCoordinates) && currentBoard[actualCoordinates.x, actualCoordinates.y] == null)
+                yield return new Move(Coordinates, actualCoordinates, this, null);
         }
 
         actualCoordinates = Coordinates;
@@ -27,13 +25,15 @@ public class Pawn : Piece{
         for (int horizontal = -1; horizontal <=1; horizontal+=2){
             actualCoordinates.y += horizontal;
             Piece possiblePiece = null;
-            if (!IsOutOfBounds(currentBoard, actualCoordinates) && (possiblePiece = currentBoard[actualCoordinates.x, actualCoordinates.y]) != null && possiblePiece.Team != Team) 
-                moves.Add(new Move(Coordinates, actualCoordinates, this, possiblePiece)); 
+            if (!IsOutOfBounds(currentBoard, actualCoordinates) &&
+                (possiblePiece = currentBoard[actualCoordinates.x, actualCoordinates.y]) != null &&
+                possiblePiece.Team != Team)
+                yield return new Move(Coordinates, actualCoordinates, this, possiblePiece);
             actualCoordinates.y -= horizontal;
         }
-
-        return moves;
     }
+    
+    
     public override Sprite GetSprite(BoardComponent boardComponent){
         if (Team == 0)
             return boardComponent.Sprites.White.Pawn;

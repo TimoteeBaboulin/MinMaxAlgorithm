@@ -113,19 +113,20 @@ public class BoardComponent : MonoBehaviour{
         DrawBoard();
         InstantiatePieces();
     }
-    
+
     private void Update(){
         _time += Time.deltaTime;
         if (_time < _timeBetweenMoves) return;
         _time = 0;
-
+        
         _hashCutoffs = 0;
         _totalLinesCalculated = 0;
         MinMaxAlphaBetaSetUp();
         Debug.Log("Transposition cutoffs: " + _hashCutoffs + "\nTotal lines calculated: " + _totalLinesCalculated);
         CurrentPlayer = CurrentPlayer == Team.Black ? Team.White : Team.Black;
-        
+        DrawPossibleMoves();
         UpdatePieces();
+        
     }
 
     private void InstantiatePieces(){
@@ -160,7 +161,6 @@ public class BoardComponent : MonoBehaviour{
             new Vector3(4 - end.y - 0.5f, 4 - end.x - 0.5f, 0);
         _pieces[end.x, end.y] = _pieces[start.x, start.y];
         _pieces[start.x, start.y] = null;
-        
     }
     
     private void DrawBoard(){
@@ -185,15 +185,18 @@ public class BoardComponent : MonoBehaviour{
         foreach (var move in _possibleMoves){
             Destroy(move);
         }
-        
-        List<Move> possibleMoves = _board.GetLegalMoves();
 
         Color color = Color.blue;
         color.a = 0.5f;
+
+        List<Move> moves = new List<Move>();
+        foreach (var move in _board.GetLegalMoves()){
+            moves.Add(move);
+        }
         
         int height = CurrentBoard.GetLength(0);
         int length = CurrentBoard.GetLength(1);
-        foreach (var possibleMove in possibleMoves){
+        foreach (var possibleMove in _board.GetLegalMoves()){
             var newTile = Instantiate(_tileBase, new Vector3(length/2 - possibleMove.EndingPosition.y -0.5f , height/2 - possibleMove.EndingPosition.x -0.5f, -1),
                 Quaternion.identity);
             
@@ -203,6 +206,7 @@ public class BoardComponent : MonoBehaviour{
     }
 
     private void MinMaxAlphaBetaSetUp(){
+        Debug.Log(CurrentPlayer);
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
@@ -219,11 +223,10 @@ public class BoardComponent : MonoBehaviour{
         int alpha = int.MinValue;
         int beta = int.MaxValue;
         
-        currentPosition.GenerateChildren();
         int value = int.MinValue;
         Node bestNode = null;
-        foreach (var child in currentPosition.Children){
-            int childValue = MinMax(child, _depth -1, int.MinValue, int.MaxValue, false);
+        foreach (var child in currentPosition.GetChildren()){
+            int childValue = MinMax(child, _depth -1, alpha, int.MaxValue, false);
             if (value < childValue){
                 value = childValue;
                 bestNode = child;
@@ -235,19 +238,21 @@ public class BoardComponent : MonoBehaviour{
         log = "Valeur du coups: " + value + "\nCe coups a pris: " + stopwatch.Elapsed;
         Debug.Log(log);
 
-        _board.Do(bestNode.Move);
-        _lastMove = bestNode.Move;
+        if (bestNode != null){
+            _board.Do(bestNode.Move);
+            _lastMove = bestNode.Move;
+        }
 
         stopwatch.Stop();
     }
-
+    
     private int MinMax(Node node, int depth, float alpha, float beta, bool maximizing){
         node.DoMove();
-
         if (depth == 0 || node.IsTerminal){
             var nodeValue = node.CalculateValue();
             TranspositionTable.Add(_board.Hash, nodeValue, depth);
             _totalLinesCalculated++;
+            node.UndoMove();
             return nodeValue;
         }
 
@@ -258,12 +263,10 @@ public class BoardComponent : MonoBehaviour{
             return hashValue;
         }
         
-        node.GenerateChildren();
-        
         int value;
         if (maximizing){
             value = int.MinValue;
-            foreach (var child in node.Children){
+            foreach (var child in node.GetChildren()){
                 value = Mathf.Max(value, MinMax(child, depth - 1, alpha, beta, false));
 
                 if (value > beta) break;
@@ -272,7 +275,7 @@ public class BoardComponent : MonoBehaviour{
         }
         else{
             value = int.MaxValue;
-            foreach (var child in node.Children){
+            foreach (var child in node.GetChildren()){
                 value = Mathf.Min(value, MinMax(child, depth - 1, alpha, beta, true));
                 
                 if (value < alpha) break;

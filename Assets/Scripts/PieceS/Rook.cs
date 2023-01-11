@@ -8,11 +8,9 @@ public class Rook : Piece{
 
     public Rook(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board){
+    public override IEnumerable<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
-        
-        List<Move> moves = new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) yield break;
 
         var actualCoordinates = Coordinates;
         
@@ -22,13 +20,13 @@ public class Rook : Piece{
             while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
                 Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                 if (pieceBlocking == null){
-                    moves.Add(new Move(Coordinates, actualCoordinates, this, null));
+                    yield return new Move(Coordinates, actualCoordinates, this, null);
                     actualCoordinates.y += horizontal;
                     continue;
                 }
-                
-                if (pieceBlocking.Team != Team) 
-                    moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
+
+                if (pieceBlocking.Team != Team)
+                    yield return new Move(Coordinates, actualCoordinates, this, pieceBlocking);
                 
                 break;
             }
@@ -42,21 +40,19 @@ public class Rook : Piece{
             while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
                 Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                 if (pieceBlocking == null){
-                    moves.Add(new Move(Coordinates, actualCoordinates, this, null));
+                    yield return new Move(Coordinates, actualCoordinates, this, null);
                     actualCoordinates.x += vertical;
                     continue;
                 }
-                
-                if (pieceBlocking.Team != Team) 
-                    moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
+
+                if (pieceBlocking.Team != Team)
+                    yield return new Move(Coordinates, actualCoordinates, this, pieceBlocking);
                 
                 break;
             }
 
             actualCoordinates = Coordinates;
         }
-
-        return moves;
     }
     public override Sprite GetSprite(BoardComponent boardComponent){
         if (Team == 0)

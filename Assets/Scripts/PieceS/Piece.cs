@@ -12,7 +12,7 @@ public abstract class Piece{
         Coordinates = coord;
     }
 
-    public abstract List<Move> PossibleMoves(Board currentBoard);
+    public abstract IEnumerable<Move> PossibleMoves(Board currentBoard);
     public abstract Sprite GetSprite(BoardComponent boardComponent);
     public abstract int GetValue();
     public abstract int GetID();
@@ -22,7 +22,7 @@ public abstract class Piece{
     }
     
     protected bool IsOutOfBounds(Piece[,] board, Vector2Int coord){
-        return coord.x >= board.GetLength(0) || coord.y >= board.GetLength(1) || coord.x < 0 || coord.y < 0;
+        return coord.x >= 8 || coord.y >= 8 || coord.x < 0 || coord.y < 0;
     }
     protected Piece GetPieceAt(Piece[,] board, Vector2Int coord){
         return board[coord.x, coord.y];

@@ -9,19 +9,15 @@ public class King : Piece{
     
     public King(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board){
+    public override IEnumerable<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) yield break;
         
-        List<Move> moves = new List<Move>();
-
         foreach (var direction in Directions){
             var actualCoordinates = Coordinates + direction;
             if (!IsOutOfBounds(currentBoard, actualCoordinates) && (GetPieceAt(currentBoard, actualCoordinates) == null || GetPieceAt(currentBoard, actualCoordinates).Team != Team))
-                moves.Add(new Move(Coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates)));
+                yield return new Move(Coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates));
         }
-
-        return moves;
     }
     public override Sprite GetSprite(BoardComponent boardComponent){
         if (Team == 0)

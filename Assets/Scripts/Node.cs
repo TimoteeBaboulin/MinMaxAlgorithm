@@ -10,7 +10,7 @@ public class Node{
     
     private readonly Board _board;
     private Team _player;
-    private int Mobility => _board.GetMobility();
+    // private int Mobility => _board.GetMobility();
 
     public Node(Board board, Move move, Team player){
         Move = move;
@@ -26,7 +26,6 @@ public class Node{
             if (!_board.IsInCheck()) value = 0;
             else if (_board.CurrentPlayer == _player) value = int.MinValue;
             else value = int.MaxValue;
-            _board.Undo();
             return value;
         }
 
@@ -52,19 +51,17 @@ public class Node{
         
         //Check for bishop pairs
         if (_board.HaveBishopPairAdvantage(_player)) value += 100;
-        else if (_board.HaveBishopPairAdvantage(_player == Team.Black ? Team.White : Team.Black)) value -= 1;
+        else if (_board.HaveBishopPairAdvantage(_player == Team.Black ? Team.White : Team.Black)) value -= 100;
 
         //Take mobility into account
-        value += Mobility * 10;
+        // value += Mobility * 10;
 
-        UndoMove();
-        
         return value;
     }
 
-    public void GenerateChildren(){
+    public IEnumerable<Node> GetChildren(){
         foreach (var move in _board.GetLegalMoves()){
-            Children.Add(new Node(_board, move, _player));
+            yield return new Node(_board, move, _player);
         }
     }
 

@@ -6,11 +6,9 @@ using UnityEngine;
 public class Knight : Piece{
     public Knight(int team, Vector2Int coord) : base(team, coord){ }
 
-    public override List<Move> PossibleMoves(Board board){
+    public override IEnumerable<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
-        
-        List<Move> moves = new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) yield break;
 
         Piece piece;
         Vector2Int actualCoordinates;
@@ -21,11 +19,9 @@ public class Knight : Piece{
 
                 Piece goal = GetPieceAt(currentBoard, actualCoordinates);
                 if (goal != null && goal.Team == Team) continue;
-                moves.Add(new Move(Coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates)));
+                yield return new Move(Coordinates, actualCoordinates, this, GetPieceAt(currentBoard, actualCoordinates));
             }
         }
-
-        return moves;
     }
     public override Sprite GetSprite(BoardComponent boardComponent){
         if (Team == 0)

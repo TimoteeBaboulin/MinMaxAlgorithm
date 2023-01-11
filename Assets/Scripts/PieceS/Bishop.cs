@@ -4,11 +4,9 @@ using UnityEngine;
 public class Bishop : Piece{
     public Bishop(int team, Vector2Int coord) : base(team, coord){ }
     
-    public override List<Move> PossibleMoves(Board board){
+    public override IEnumerable<Move> PossibleMoves(Board board){
         var currentBoard = board.CurrentBoard;
-        if (currentBoard[Coordinates.x, Coordinates.y] != this) return new List<Move>();
-        
-        List<Move> moves = new List<Move>();
+        if (currentBoard[Coordinates.x, Coordinates.y] != this) yield break;
 
         for (int horizontal = -1; horizontal <= 1; horizontal+=2){
             for (int vertical = -1; vertical <= 1; vertical+=2){
@@ -19,21 +17,19 @@ public class Bishop : Piece{
                 while (!IsOutOfBounds(currentBoard, actualCoordinates) ){
                     Piece pieceBlocking = GetPieceAt(currentBoard, actualCoordinates);
                     if (pieceBlocking == null){
-                        moves.Add(new Move(Coordinates, actualCoordinates, this, null));
+                        yield return new Move(Coordinates, actualCoordinates, this, null);
                         actualCoordinates.x += vertical;
                         actualCoordinates.y += horizontal;
                         continue;
                     }
                 
                     if (pieceBlocking.Team != Team) 
-                        moves.Add(new Move(Coordinates, actualCoordinates, this, pieceBlocking));
+                        yield return new Move(Coordinates, actualCoordinates, this, pieceBlocking);
                 
                     break;
                 }
             }
         }
-
-        return moves;
     }
     
     

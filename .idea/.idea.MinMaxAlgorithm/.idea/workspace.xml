@@ -8,7 +8,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/3c/7e7a2fcb/List`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/86acb61e0d2b4b36bc20af11093be9a5157e00/e5/be82eb20/UnitySynchronizationContext.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/t.baboulin/Documents/LocalRepositories/MinMaxAlgorithm/Assets/Scripts/Board.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/UIBehaviour.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -19,13 +25,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Discover.Launch.Via.Unity": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Discover.Launch.Via.Unity&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="UnitTests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\2021.3.11f1\Editor\Unity.exe" />
@@ -45,10 +51,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="6272">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" />
+      <option name="pid" value="6272" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -94,11 +100,17 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <condition expression="(board[StartingPosition.x, StartingPosition.y] == null)" language="C#" />
-          <url>file://$PROJECT_DIR$/Assets/Scripts/Pieces/Piece.cs</url>
-          <line>28</line>
-          <properties documentPath="D:\Unity Projects\MinMaxAlgorithm\Assets\Scripts\PieceS\Piece.cs" initialLine="39" containingFunctionPresentation="method 'Do'" />
-          <option name="timeStamp" value="1" />
+          <url>file://$PROJECT_DIR$/Assets/Scripts/BoardComponent.cs</url>
+          <line>123</line>
+          <properties documentPath="C:\Users\t.baboulin\Documents\LocalRepositories\MinMaxAlgorithm\Assets\Scripts\BoardComponent.cs" initialLine="123" containingFunctionPresentation="method 'Update'">
+            <startOffsets>
+              <option value="3644" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3667" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
