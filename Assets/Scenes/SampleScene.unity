@@ -404,6 +404,8 @@ MonoBehaviour:
   _gameMode: 0
   _humanPlayer: 0
   _occupancyType: 2
+  _file: 1
+  _diagonal: 0
 --- !u!4 &1764422389
 Transform:
   m_ObjectHideFlags: 0

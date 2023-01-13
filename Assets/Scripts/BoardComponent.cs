@@ -55,6 +55,8 @@ public class BoardComponent : MonoBehaviour{
 
     [Header("BitBoard Debug")] 
     [SerializeField] private OccupancyType _occupancyType;
+    [SerializeField] [Range(1, 8)] private int _file;
+    [SerializeField] [Range(0, 15)] private int _diagonal;
     
     //Actual board
     private Board _board;
@@ -124,6 +126,13 @@ public class BoardComponent : MonoBehaviour{
         //Draw the background tiles
         DrawBoard();
         InstantiatePieces();
+        
+        BitBoards.PreComputeBitBoards();
+        string log = "";
+        for (int x = 0; x < 8; x++){
+            log += Convert.ToString(BitBoards.Files[x], 2).PadLeft(64, '0') + "\n";
+        }
+        Debug.Log(log);
     }
     private void Update(){
         // _time += Time.deltaTime;
@@ -137,6 +146,8 @@ public class BoardComponent : MonoBehaviour{
         //
         // UpdatePieces();
 
+        DrawPossibleMoves();
+        
         if (Input.GetMouseButtonDown(0)){
             var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             int mouseX = Mathf.RoundToInt(mousePosition.x);
@@ -152,9 +163,9 @@ public class BoardComponent : MonoBehaviour{
             }
             _selected = CurrentBoard[mouseY * 8 + mouseX];
         }
-        
+
         UpdatePieces();
-        DrawPossibleMoves();
+        
         DrawOccupancy();
     }
 
@@ -220,23 +231,50 @@ public class BoardComponent : MonoBehaviour{
             Destroy(move);
         }
         
-        if (_selected == null || _selected.Team != CurrentPlayer) return;
+        if (_selected == null) return;
         
-        List<Move> possibleMoves = _selected.PossibleMoves(_board);
+        // List<Move> possibleMoves = _selected.PossibleMoves(_board);
 
         Color color = Color.blue;
         color.a = 0.5f;
 
-        if (Board.AttackToBitBoards[_selected.Coordinates] == 0) return;
+        // if (Board.AttackToBitBoards[_selected.Coordinates] == 0) return;
+
+        long diagonal = BitBoards.CalculateDiagonal(_selected.Coordinates);
+        long antiDiagonal = BitBoards.CalculateAntiDiagonal(_selected.Coordinates);
+
+        diagonal |= antiDiagonal;
         
         for (int x = 0; x < 64; x++){
-            if ((Board.AttackToBitBoards[_selected.Coordinates] & ((ulong) 1 << x)) != 0){
+            // if ((Board.AttackToBitBoards[_selected.Coordinates] & ((ulong) 1 << x)) != 0){
+            //     int endY = x % 8;
+            //     int endX = (x - endY) / 8;
+            //     
+            //     var newTile = Instantiate(_tileBase, new Vector3(endY , endX, -1),
+            //         Quaternion.identity);
+            //
+            //     newTile.GetComponent<MeshRenderer>().material.color = color;
+            //     _possibleMoves.Add(newTile);
+            // }
+
+            // if ((BitBoards.Files[_file - 1] & ((long)1 << x)) != 0){
+            //     int endY = x % 8;
+            //     int endX = (x - endY) / 8;
+            //     
+            //     var newTile = Instantiate(_tileBase, new Vector3(endY , endX, -1),
+            //         Quaternion.identity);
+            //     
+            //     newTile.GetComponent<MeshRenderer>().material.color = color;
+            //     _possibleMoves.Add(newTile);
+            // }
+
+            if ((diagonal & ((long)1 << x)) != 0){
                 int endY = x % 8;
                 int endX = (x - endY) / 8;
                 
                 var newTile = Instantiate(_tileBase, new Vector3(endY , endX, -1),
                     Quaternion.identity);
-            
+                
                 newTile.GetComponent<MeshRenderer>().material.color = color;
                 _possibleMoves.Add(newTile);
             }
