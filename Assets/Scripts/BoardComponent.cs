@@ -244,6 +244,8 @@ public class BoardComponent : MonoBehaviour{
         long antiDiagonal = BitBoards.CalculateAntiDiagonal(_selected.Coordinates);
 
         diagonal |= antiDiagonal;
+
+        diagonal = _selected.GetAttackLines();
         
         for (int x = 0; x < 64; x++){
             // if ((Board.AttackToBitBoards[_selected.Coordinates] & ((ulong) 1 << x)) != 0){

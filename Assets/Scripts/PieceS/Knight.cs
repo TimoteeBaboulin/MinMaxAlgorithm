@@ -80,6 +80,11 @@ public class Knight : Piece{
             return boardComponent.Sprites.White.Knight;
         return boardComponent.Sprites.Black.Knight;
     }
+
+    public override long GetAttackLines(){
+        throw new NotImplementedException();
+    }
+
     public override int GetValue(){
         return 350;
     }

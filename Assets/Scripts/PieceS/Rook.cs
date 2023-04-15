@@ -32,9 +32,35 @@ public class Rook : Piece{
 
         return moves;
     }
+
     public override Sprite GetSprite(BoardComponent boardComponent){
         return Team == 0 ? boardComponent.Sprites.White.Rook : boardComponent.Sprites.Black.Rook;
     }
+
+    public override long GetAttackLines(){
+        long slider = (long)1 << Coordinates;
+        long occupied = BitBoards.OccupiedSquares & ~slider;
+
+        long reverseOccupied =  BitBoards.ReverseBytes(occupied);
+        long reverseSlider =  BitBoards.ReverseBytes(slider);
+        
+        long lineAttacks = occupied ^ (occupied - 2 * slider);
+        lineAttacks = (occupied ^ (occupied - 2 * slider)) ^
+                      ( BitBoards.ReverseBytes((reverseOccupied - 2 * reverseSlider)));
+        lineAttacks &= BitBoards.Ranks[Mathf.FloorToInt((float)Coordinates / 8)];
+
+        long file = BitBoards.Files[Mathf.FloorToInt((float)Coordinates % 8)] & ~slider;
+        long forward = BitBoards.OccupiedSquares & file;
+        long backward = BitBoards.ReverseBytes(forward);
+        forward -= slider;
+        backward -= BitBoards.ReverseBytes(slider);
+        forward ^= BitBoards.ReverseBytes(backward);
+        lineAttacks |= forward & file;
+        
+        Debug.Log(Coordinates);
+        return lineAttacks;
+    }
+
     public override int GetValue(){
         return 525;
     }

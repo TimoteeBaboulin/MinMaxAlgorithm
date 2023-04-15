@@ -41,6 +41,11 @@ public class Bishop : Piece{
             return boardComponent.Sprites.White.Bishop;
         return boardComponent.Sprites.Black.Bishop;
     }
+
+    public override long GetAttackLines(){
+        throw new NotImplementedException();
+    }
+
     public override int GetValue(){
         return 350;
     }

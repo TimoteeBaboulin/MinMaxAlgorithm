@@ -18,13 +18,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Discover.Launch.Via.Unity&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-  }
-}</component>
+  <component name="PropertiesComponent">
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.35067752" />
+    <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
+    <property name="Discover.Launch.Via.Unity" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="UnitTests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\2021.3.11f1\Editor\Unity.exe" />
@@ -44,10 +44,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="4084">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" />
+      <option name="pid" value="4084" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -82,6 +82,9 @@
       <workItem from="1673408577580" duration="5640000" />
       <workItem from="1673420449977" duration="7190000" />
       <workItem from="1673595562679" duration="4130000" />
+      <workItem from="1673642959801" duration="2968000" />
+      <workItem from="1673698293167" duration="2482000" />
+      <workItem from="1673784518992" duration="2016000" />
     </task>
     <servers />
   </component>
@@ -97,17 +100,43 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/BoardComponent.cs</url>
-          <line>211</line>
-          <properties documentPath="C:\Users\t.baboulin\Documents\LocalRepositories\MinMaxAlgorithm\Assets\Scripts\BoardComponent.cs" initialLine="200" containingFunctionPresentation="method 'DrawBoard'">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Pieces/Rook.cs</url>
+          <line>54</line>
+          <properties documentPath="D:\Unity Projects\MinMaxAlgorithm\Assets\Scripts\Pieces\Rook.cs" initialLine="54" containingFunctionPresentation="method 'GetAttackLines'">
             <startOffsets>
-              <option value="6613" />
+              <option value="2096" />
             </startOffsets>
             <endOffsets>
-              <option value="6614" />
+              <option value="2115" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Pieces/Rook.cs</url>
+          <line>53</line>
+          <properties documentPath="D:\Unity Projects\MinMaxAlgorithm\Assets\Scripts\Pieces\Rook.cs" initialLine="53" containingFunctionPresentation="method 'GetAttackLines'">
+            <startOffsets>
+              <option value="2039" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2087" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Pieces/Rook.cs</url>
+          <line>52</line>
+          <properties documentPath="D:\Unity Projects\MinMaxAlgorithm\Assets\Scripts\Pieces\Rook.cs" initialLine="52" containingFunctionPresentation="method 'GetAttackLines'">
+            <startOffsets>
+              <option value="1999" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2030" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

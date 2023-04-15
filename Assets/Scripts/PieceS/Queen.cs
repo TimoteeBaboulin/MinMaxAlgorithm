@@ -39,6 +39,11 @@ public class Queen : Piece{
             return boardComponent.Sprites.White.Queen;
         return boardComponent.Sprites.Black.Queen;
     }
+
+    public override long GetAttackLines(){
+        throw new NotImplementedException();
+    }
+
     public override int GetValue(){
         return 1000;
     }

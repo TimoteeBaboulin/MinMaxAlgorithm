@@ -32,6 +32,11 @@ public class King : Piece{
             return boardComponent.Sprites.White.King;
         return boardComponent.Sprites.Black.King;
     }
+
+    public override long GetAttackLines(){
+        throw new NotImplementedException();
+    }
+
     public override int GetValue(){
         return 0;
     }

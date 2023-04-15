@@ -62,6 +62,11 @@ public class Pawn : Piece{
             return boardComponent.Sprites.White.Pawn;
         return boardComponent.Sprites.Black.Pawn;
     }
+
+    public override long GetAttackLines(){
+        throw new NotImplementedException();
+    }
+
     public override int GetValue(){
         return 100;
     }

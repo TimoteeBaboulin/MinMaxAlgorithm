@@ -400,7 +400,7 @@ MonoBehaviour:
   _tileBase: {fileID: 2389774468048913912, guid: f07605ca9cb8fc74ba4d822c0044c73e, type: 3}
   _depth: 5
   _timeBetweenMoves: 2
-  _startingPosition: 0
+  _startingPosition: 4
   _gameMode: 0
   _humanPlayer: 0
   _occupancyType: 2

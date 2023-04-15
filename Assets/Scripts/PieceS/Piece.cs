@@ -14,6 +14,7 @@ public abstract class Piece{
 
     public abstract List<Move> PossibleMoves(Board currentBoard);
     public abstract Sprite GetSprite(BoardComponent boardComponent);
+    public abstract long GetAttackLines();
     public abstract int GetValue();
     public abstract int GetID();
     public abstract void SetToBitBoard();
